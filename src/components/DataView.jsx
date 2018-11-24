@@ -1,5 +1,9 @@
 import React, { Component, Fragment } from "react";
 import "../../node_modules/react-vis/dist/style.css";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
+
 import {
   XYPlot,
   LineSeries,
@@ -7,15 +11,15 @@ import {
   VerticalGridLines,
   HorizontalGridLines,
   XAxis,
-  YAxis,
-  Crosshair
+  YAxis
 } from "react-vis";
 
 class DataView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      commonComments: []
+      topDataPoint: { x: 0, y: 0 },
+      bottomDataPoint: { x: 0, y: 0 }
     };
   }
 
@@ -25,6 +29,13 @@ class DataView extends Component {
     let dataArray = [];
     dataPoints.map((dataPoint, index) => {
       if (dataPoint.average_value !== 0) {
+        if (this.state.topDataPoint.y < dataPoint.average_value) {
+          this.state.topDataPoint.x = index;
+          this.state.topDataPoint.y = dataPoint.average_value;
+        } else if (this.state.bottomDataPoint.y > dataPoint.average_value) {
+          this.state.bottomDataPoint.x = index;
+          this.state.bottomDataPoint.y = dataPoint.average_value;
+        }
         dataArray.push({
           x: index,
           y: dataPoint.average_value
@@ -32,6 +43,8 @@ class DataView extends Component {
       }
     });
 
+    console.log("top data point: ", this.state.topDataPoint);
+    console.log("bottom data point: ", this.state.bottomDataPoint);
     return dataArray;
   }
 
@@ -39,27 +52,8 @@ class DataView extends Component {
 
   render() {
     const { dataFilter, data } = this.props;
-    const { commonComments } = this.state;
+    const { commonComments, topDataPoint, bottomDataPoint } = this.state;
 
-    /// Response Data
-    // {
-    //   interval: "2018-11-20T21:00:00",
-    //   average_value: 17.8,
-    //   common_comments: ["this sucks", "this rocks"],
-    //   sentiments: {
-    //     Very_Bad: 1,
-    //     Bad: 9,
-    //     Average: 3,
-    //     Good: 23,
-    //     Very_Good: 53
-    //   }
-    // }
-
-    /// Need to convert to
-    // [{x: 1, y: 10}, {x: 2, y: 7}, {x: 3, y: 15}]
-
-    /// what I'm actually returning
-    // [{x: 1}, {y: 10}, {x: 2}, {y: 7}, {x: 3}, {y: 15}]
     const dataPoints = this.formatLineDataPoints(data);
     console.log("Datapoints: ", dataPoints);
 
@@ -76,7 +70,7 @@ class DataView extends Component {
             >
               <VerticalGridLines />
               <HorizontalGridLines />
-              <XAxis title="Period of Time (Last Seven Days)" />
+              <XAxis title="Number of Intervals" />
               <YAxis title="Average Sentiment Score" />
               <LineSeries
                 onNearestX={(datapoint, index) => {
@@ -87,11 +81,18 @@ class DataView extends Component {
                 }}
                 data={dataPoints}
               />
-              <Crosshair
-                values={commonComments}
-                className="comments-container"
-              />
             </XYPlot>
+            <Card>
+              <CardContent>
+                <Typography component="p">
+                  Highest Sentiment Score: {topDataPoint.y} at interval{" "}
+                  {topDataPoint.x}
+                  <br />
+                  Lowest Sentiment Score: {bottomDataPoint.y} at interval{" "}
+                  {bottomDataPoint.x}
+                </Typography>
+              </CardContent>
+            </Card>
           </div>
         ) : (
           <div>

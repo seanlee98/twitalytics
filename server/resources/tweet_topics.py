@@ -9,7 +9,7 @@ stop_words = stopwords.words('english')
 
 wordtags = nltk.ConditionalFreqDist((w.lower(), t) 
         for w, t in brown.tagged_words(tagset="universal"))
-
+    
 def preprocessSentence(sentence):
     new = sentence
 
@@ -67,11 +67,11 @@ def getBagOfWords(corpus):
     imp_words = []
     for i, word in enumerate(corpus_words):
         #only want words that appear more than once total in the corpus
-        #and verbs/adjectives to appear in our bag of words
-        if ('VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word])) and (getWordFreq(corpus_vector, i) > 2):
+        #and nouns/verbs/adjectives to appear in our bag of words 
+        if ('NOUN' in list(wordtags[word]) or 'VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word])) and (getWordFreq(corpus_vector, i) > len(corpus)/10):
             imp_word_indices.append(i)
             imp_words.append(word)
-            print(i)
+            print(getWordFreq(corpus_vector, i))
 
     corpus_vector_new = []
     for sentence_vector in corpus_vector:
@@ -86,8 +86,49 @@ def runCluster(corpus_vector):
     #min_samples = number of samples (or total weight) in a neighborhood for a point to be considered as a core point
     #need this to be at least 10% of corpus to be considered a cluster
     clustering = DBSCAN(eps=1, min_samples=len(corpus_vec)/10).fit(corpus_vector)
-    print(clustering.labels_)
+    return clustering.labels_
 
+def group_consecutives(vals, step=1):
+    """Return list of consecutive lists of numbers from vals (number list)."""
+    run = []
+    result = [run]
+    expect = None
+    for v in vals:
+        if (v == expect) or (expect is None):
+            run.append(v)
+        else:
+            run = [v]
+            result.append(run)
+        expect = v + step
+    return result
+
+def extractKeyPhrases(index, document, corpus_vec, important_words):
+    #get indices where vectorizer gives a non zero value
+    key_words_indices = [i for i, x in enumerate(corpus_vec[index]) if x > 0]
+    key_words = [x for i, x in enumerate(important_words) if i in key_words_indices ]
+
+    word_arr = document[index].split(' ')
+    key_word_positions = []
+    for i, kw in enumerate(key_words):
+        key_word_positions.append(word_arr.index(kw))
+    
+    key_word_positions.sort()
+    consecutive_key_words = group_consecutives(key_word_positions)
+    key_phrases = []
+    for phrase_location in consecutive_key_words:
+        phrase_arr = word_arr[phrase_location[0]:phrase_location[-1] + 1]
+        key_phrase = ""
+        for i, word in enumerate(phrase_arr):
+            key_phrase = key_phrase + word
+            if i != len(phrase_arr) - 1:
+                key_phrase = key_phrase + " "
+        
+        key_phrases.append(key_phrase)
+    
+    print(key_phrases)
+    
+    return key_phrases
+    
 #print(list(wordtags['report']))
 with open('text_samples/justin bieber_good.txt', 'r') as myfile:
     raw_text = myfile.read().replace('\n', '')
@@ -101,7 +142,17 @@ for s in sentence_arr:
         document.append(preprocessSentence(s))
 
 corpus_vec, important_words = getBagOfWords(document)
-runCluster(corpus_vec)
+
+lbls = runCluster(corpus_vec)
+
+for i in range(max(lbls) + 1):
+    #first check if vector representing first tweet in the cluster is an all 0 vector
+    #if so, diregard
+    firstInd = lbls.tolist().index(i)
+    if np.count_nonzero(corpus_vec[firstInd]) > 0:
+        cluster_indices = [j for j, x in enumerate(lbls) if x == i]
+        for cluster_ind in cluster_indices:
+             extractKeyPhrases(cluster_ind, document, corpus_vec, important_words)
 
 
 

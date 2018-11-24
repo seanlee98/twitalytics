@@ -22,6 +22,7 @@ marshmallow==2.14.0
 marshmallow-sqlalchemy==0.13.2
 mccabe==0.6.1
 nltk==3.4
+numpy==1.15.4
 oauthlib==2.1.0
 psycopg2==2.7.5
 pylint==2.1.1
@@ -31,8 +32,11 @@ python-editor==1.0.3
 pytz==2018.7
 requests==2.20.1
 requests-oauthlib==1.0.0
+scikit-learn==0.20.1
+scipy==1.1.0
 singledispatch==3.4.0.3
 six==1.11.0
+sklearn==0.0
 SQLAlchemy==1.2.14
 textblob==0.15.2
 tweepy==3.6.0

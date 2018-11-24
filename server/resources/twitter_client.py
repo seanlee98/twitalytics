@@ -96,7 +96,7 @@ class TwitterClient(object):
 				}
 		try: 
 			# call twitter api to fetch tweets 
-			fetched_tweets = self.api.search(q = query, count = count) 
+			fetched_tweets = self.api.search(q = query, count = count, lang = "en") 
 
 			# add sentiments to correct bucket in time
 			for tweet in fetched_tweets:  
@@ -120,7 +120,28 @@ class TwitterClient(object):
 				elif sentiment >= 60 and sentiment <= 100:
 					austin["Very Good"].append(austin_text)
 					intervals[created_at]["sentiments"]["Very Good"] += 1
+			
+			goodFile = open(query + "_good.txt", "w")
+			for phrase in austin["Good"]:
+				goodFile.write(phrase + ",,,")
+			for phrase in austin["Very Good"]:
+				goodFile.write(phrase + ",,,")
+			goodFile.close()
+
+			avgFile = open(query + "_avg.txt", "w")
+			for phrase in austin["Average"]:
+				avgFile.write(phrase + ",,,")
+			avgFile.close()
+
+			badFile = open(query + "_bad.txt", "w")
+			for phrase in austin["Bad"]:
+				badFile.write(phrase + ",,,")
+			for phrase in austin["Very Bad"]:
+				badFile.write(phrase + ",,,")
+			badFile.close()
+			
 			return austin
+
 			for _,interval in intervals.items():
 				if interval["average_value"]:
 					num = len(interval["average_value"])

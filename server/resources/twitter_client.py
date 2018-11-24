@@ -70,6 +70,8 @@ class TwitterClient(object):
 		'''
 		# empty list to store parsed tweets 
 		intervals = {} 
+		bad_tweets = []
+		good_tweets = []
 		current_time = datetime.utcnow()
 		current_time = current_time.replace(second=0, microsecond=0, minute=0, hour=current_time.hour)
 		intervals[self.json_serial(current_time)] = {
@@ -98,7 +100,7 @@ class TwitterClient(object):
 			smallest_id = 9223372036854775807
 			run = True
 			query = {
-				'q': search_parameters,  
+				'q': str(search_parameters),  
 				'count': 100,
 				'lang': 'en'
 			}
@@ -116,17 +118,21 @@ class TwitterClient(object):
 						intervals[created_at]["average_value"].append(sentiment)
 						if sentiment >= -100 and sentiment < -60:
 							intervals[created_at]["sentiments"]["Very_Bad"] += 1
+							bad_tweets.append(tweet.text)
 						elif sentiment >= -60 and sentiment < -20:
 							intervals[created_at]["sentiments"]["Bad"] += 1
+							bad_tweets.append(tweet.text)
 						elif sentiment >= -20 and sentiment < 20:
 							intervals[created_at]["sentiments"]["Average"] += 1
 						elif sentiment >= 20 and sentiment < 60:
 							intervals[created_at]["sentiments"]["Good"] += 1
+							good_tweets.append(tweet.text)
 						elif sentiment >= 60 and sentiment <= 100:
 							intervals[created_at]["sentiments"]["Very_Good"] += 1
+							good_tweets.append(tweet.text)
 					# call twitter api to fetch tweets 
 					query = {
-						'q': search_parameters,  
+						'q': str(search_parameters),  
 						'count': 100,
 						'max_id': smallest_id,
 						'lang': 'en'
@@ -159,8 +165,9 @@ class TwitterClient(object):
 					}
 			) 
 			correct_shape = sorted(correct_shape, key=lambda k: k['interval']) 
-
-			return correct_shape 
+			return correct_shape
+			# common_tweets = AUSTIN(bad_tweets, good_tweets)
+			# return {"sentiments": correct_shape, "common_tweets": common_tweets} 
 			
 		except Exception: 
 			print("You done fucked up")

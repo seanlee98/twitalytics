@@ -2,6 +2,7 @@ import re
 import tweepy 
 from tweepy import OAuthHandler 
 from textblob import TextBlob 
+from datetime import date, datetime, timedelta
 
 class TwitterClient(object): 
 	''' 
@@ -43,45 +44,68 @@ class TwitterClient(object):
 		# create TextBlob object of passed tweet text 
 		analysis = TextBlob(self.clean_tweet(tweet)) 
 		# set sentiment 
-		if analysis.sentiment.polarity > 0: 
-			return 'positive'
-		elif analysis.sentiment.polarity == 0: 
-			return 'neutral'
-		else: 
-			return 'negative'
+		return analysis.sentiment.polarity * 100 
 
-	def get_tweets(self, interval, query, count = 10): 
+	def json_serial(self, obj):
+		"""JSON serializer for objects not serializable by default json code"""
+
+		if isinstance(obj, (datetime, date)):
+			return obj.isoformat()
+		raise TypeError ("Type %s not serializable" % type(obj))
+
+	def subtract_hour_from_datetime(self, obj):
+		return obj - timedelta(hours=1)
+	def get_tweets(self, time_range, query, count = 100): 
 		''' 
 		Main function to fetch tweets and parse them. 
 		'''
 		# empty list to store parsed tweets 
-		tweets = [] 
+		intervals = {} 
+		current_time = datetime.now()
+		current_time = current_time.replace(second=0, microsecond=0, minute=0, hour=current_time.hour)
+		sentiments = {
+			"-100": 0,
+			"-60": 0,
+			"-20": 0,
+			"20": 0,
+			"60": 0,
+		}
+		for _ in range(168):
+			current_time = self.subtract_hour_from_datetime(current_time)
+			intervals[self.json_serial(current_time)] = {"sentiments": sentiments, "average_value": [], "common_comments": []}
 
 		try: 
 			# call twitter api to fetch tweets 
 			fetched_tweets = self.api.search(q = query, count = count) 
 
-			# parsing tweets one by one 
-			for tweet in fetched_tweets: 
-				# empty dictionary to store required params of a tweet 
-				parsed_tweet = {} 
+			# add sentiments to correct bucket in time
+			for tweet in fetched_tweets:  
+				created_at = tweet.created_at
+				created_at = self.json_serial(current_time.replace(second=0, microsecond=0, minute=0, hour=created_at.hour))
+				sentiment = self.get_tweet_sentiment(tweet.text) 
+				intervals[created_at]["average_value"].append(sentiment)
+				if sentiment >= -100 and sentiment < -60:
+					intervals[created_at]["sentiments"]["-100"] += 1
+				elif sentiment >= -60 and sentiment < -20:
+					intervals[created_at]["sentiments"]["-60"] += 1
+				elif sentiment >= -20 and sentiment < 20:
+					intervals[created_at]["sentiments"]["-20"] += 1
+				elif sentiment >= 20 and sentiment < 60:
+					intervals[created_at]["sentiments"]["20"] += 1
+				elif sentiment >= 60 and sentiment <= 100:
+					intervals[created_at]["sentiments"]["60"] += 1
 
-				# saving text of tweet 
-				parsed_tweet['text'] = tweet.text 
-				# saving sentiment of tweet 
-				parsed_tweet['sentiment'] = self.get_tweet_sentiment(tweet.text) 
-
-				# appending parsed tweet to tweets list 
-				if tweet.retweet_count > 0: 
-					# if tweet has retweets, ensure that it is appended only once 
-					if parsed_tweet not in tweets: 
-						tweets.append(parsed_tweet) 
-				else: 
-					tweets.append(parsed_tweet) 
-
-			# return parsed tweets 
-			return tweets 
-
+			for _,interval in intervals.items():
+				if interval["average_value"]:
+					num = len(interval["average_value"])
+					total = 0
+					for sentiment in interval["average_value"]:
+						total += sentiment
+					interval["average_value"] = total / num
+				else:
+					interval["average_value"] = 0
+			return intervals 
+			
 		except tweepy.TweepError as e: 
 			# print error (if any) 
 			print("Error : " + str(e)) 

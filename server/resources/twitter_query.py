@@ -4,9 +4,10 @@ from resources.twitter_client import TwitterClient
 
 class TwitterQuery(Resource):
     def get(self):
-        interval = request.json.get('interval')
-        query = request.json.get('query')
+        args = request.args
+        interval = args["interval"]
+        query = args["query"]
         api = TwitterClient()
-        return api.get_tweets(interval, query)        
-
+        return api.get_tweets(interval, query)   
     
+

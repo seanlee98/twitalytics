@@ -13,7 +13,9 @@ code {
     monospace;
 }
 
-.data-container {
-  vertical-align: middle;
-  margin: auto;
+.container {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

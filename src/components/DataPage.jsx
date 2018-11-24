@@ -7,6 +7,7 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import DataView from "./DataView";
+import { fetchTwitterData } from "../utils/ApiCalls";
 
 const styles = theme => ({
   root: {
@@ -25,62 +26,140 @@ const styles = theme => ({
 class DataPage extends Component {
   state = {
     filter: "",
+    interval: "",
     labelWidth: 0,
-    dataFilter: null
+    dataFilter: "Sentiment Analysis",
+    dataInterval: "Interval 1",
+    data: null
   };
-  componentDidMount() {
+  async componentDidMount() {
+    const data = await fetchTwitterData();
     this.setState({
       labelWidth: 50
     });
   }
 
   handleChange = event => {
-    this.setState({ dataFilter: event.target.value });
-    console.log("dataFilter being passed in", event.target.value);
+    const value = event.target.value;
+    if (value.includes("Sentiment")) {
+      this.setState({
+        dataFilter: value,
+        [event.target.name]: value
+      });
+    } else {
+      this.setState({
+        dataInterval: value,
+        [event.target.name]: value
+      });
+    }
   };
 
   render() {
     const { classes } = this.props;
     const { dataFilter } = this.state;
     const data = [
-      { x: 0, y: 8 },
-      { x: 1, y: 5 },
-      { x: 2, y: 4 },
-      { x: 3, y: 9 },
-      { x: 4, y: 1 },
-      { x: 5, y: 7 },
-      { x: 6, y: 6 },
-      { x: 7, y: 3 },
-      { x: 8, y: 2 },
-      { x: 9, y: 0 }
+      {
+        interval: "2018-11-20T19:00:00",
+        average_value: 20.0,
+        common_comments: ["this sucks", "this rocks"],
+        sentiments: {
+          Very_Bad: 0,
+          Bad: 9,
+          Average: 63,
+          Good: 23,
+          Very_Good: 5
+        }
+      },
+      {
+        interval: "2018-11-20T20:00:00",
+        average_value: 15.2,
+        common_comments: ["this sucks", "this rocks"],
+        sentiments: {
+          Very_Bad: 0,
+          Bad: 9,
+          Average: 34,
+          Good: 23,
+          Very_Good: 10
+        }
+      },
+      {
+        interval: "2018-11-20T21:00:00",
+        average_value: 17.8,
+        common_comments: ["this sucks", "this rocks"],
+        sentiments: {
+          Very_Bad: 1,
+          Bad: 9,
+          Average: 3,
+          Good: 23,
+          Very_Good: 53
+        }
+      }
     ];
 
     return (
       <Fragment>
-        <div className="data-container">
-          <form>
-            <FormControl className={classes.formControl}>
-              <InputLabel htmlFor="filter-simple">Filter</InputLabel>
-              <Select
-                value={this.state.filter}
-                onChange={this.handleChange}
-                inputProps={{
-                  name: "filter",
-                  id: "filter-simple"
-                }}
-              >
-                <MenuItem value="">
-                  <em>None</em>
-                </MenuItem>
-                <MenuItem value={"Sentiment Analysis"}>
-                  Sentiment Analysis
-                </MenuItem>
-                <MenuItem value={"Bar"}>Bar Graph stuff</MenuItem>
-                <MenuItem value={"Common Feedback"}>Common Feedback</MenuItem>
-              </Select>
-            </FormControl>
-          </form>
-          <DataView dataFilter={dataFilter} data={data} />
+        <div className="container">
+          <div className="data-container">
+            {dataFilter.includes("Sentiment Analysis") ? (
+              <form>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="filter-simple">Filter</InputLabel>
+                  <Select
+                    value={this.state.filter}
+                    onChange={this.handleChange}
+                    inputProps={{
+                      name: "filter",
+                      id: "filter-simple"
+                    }}
+                  >
+                    <MenuItem value={"Sentiment Analysis"}>
+                      Sentiment Analysis
+                    </MenuItem>
+                    <MenuItem value={"Sentiment Count"}>
+                      Sentiment Count
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </form>
+            ) : (
+              <form>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="filter-simple">Filter</InputLabel>
+                  <Select
+                    value={this.state.filter}
+                    onChange={this.handleChange}
+                    inputProps={{
+                      name: "filter",
+                      id: "filter-simple"
+                    }}
+                  >
+                    <MenuItem value={"Sentiment Analysis"}>
+                      Sentiment Analysis
+                    </MenuItem>
+                    <MenuItem value={"Sentiment Count"}>
+                      Sentiment Count
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="filter-simple">Interval</InputLabel>
+                  <Select
+                    value={this.state.interval}
+                    onChange={this.handleChange}
+                    inputProps={{
+                      name: "interval",
+                      id: "interval-simple"
+                    }}
+                  >
+                    <MenuItem value={"Interval 1"}>Interval 1</MenuItem>
+                    <MenuItem value={"Interval 2"}>Interval 2</MenuItem>
+                  </Select>
+                </FormControl>
+              </form>
+            )}
+
+            <DataView dataFilter={dataFilter} data={data} />
+          </div>
         </div>
       </Fragment>
     );

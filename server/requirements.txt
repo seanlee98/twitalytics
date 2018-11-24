@@ -44,3 +44,5 @@ typed-ast==1.1.0
 urllib3==1.24.1
 Werkzeug==0.14.1
 wrapt==1.10.11
+pytz==2018.7
+twython==3.7.0

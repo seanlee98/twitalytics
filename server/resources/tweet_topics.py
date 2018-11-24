@@ -4,12 +4,13 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.cluster import DBSCAN
 import numpy as np
 import re
+import json
 
 stop_words = stopwords.words('english')
 
 wordtags = nltk.ConditionalFreqDist((w.lower(), t) 
         for w, t in brown.tagged_words(tagset="universal"))
-    
+
 def preprocessSentence(sentence):
     new = sentence
 
@@ -20,24 +21,18 @@ def preprocessSentence(sentence):
     if new[0] == "R" and new[1] == "T":
         end_of_rt = new.find(':') + 2
         new = new[end_of_rt:]
+    
+    new = new.replace('\n', " ")
+    new = (new.encode('ascii', 'ignore')).decode("utf8")
+    #filter all other non word characters
+    new = re.sub(r'([^\s\w]|_)+', '', new)
 
     #remove filler words
     s = " "
     str_arr = new.split(s)
     str_arr_filtered = [x for x in str_arr if x not in stop_words and x[0:4] != "http"]
-
-    #get rid of all this random /u stuff
-    for string in str_arr_filtered:
-        if string.find("/u") != -1:
-            if string.find("/u") + 5 < len(string):
-                rm_substring = string[string.find("/u"):string.find("/u") + 5]
-            else:
-                rm_substring = string[string.find("/u"):]
-            string = string.replace(rm_substring, "")
-
+            
     new = s.join(str_arr_filtered)
-    #filter all other non word characters
-    new = re.sub(r'([^\s\w]|_)+', '', new)
 
     #convert to only lowercase
     new = new.lower()
@@ -66,9 +61,9 @@ def getBagOfWords(corpus):
     imp_word_indices = []
     imp_words = []
     for i, word in enumerate(corpus_words):
-        #only want words that appear more than once total in the corpus
+        #only want words that appear in more than 4% of the corpus
         #and nouns/verbs/adjectives to appear in our bag of words 
-        if ('NOUN' in list(wordtags[word]) or 'VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word])) and (getWordFreq(corpus_vector, i) > len(corpus)/10):
+        if ('NOUN' in list(wordtags[word]) or 'VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word])) and (getWordFreq(corpus_vector, i) > len(corpus)/25):
             imp_word_indices.append(i)
             imp_words.append(word)
             print(getWordFreq(corpus_vector, i))
@@ -85,7 +80,7 @@ def runCluster(corpus_vector):
     #eps = The maximum distance between two samples for them to be considered as in the same neighborhood.
     #min_samples = number of samples (or total weight) in a neighborhood for a point to be considered as a core point
     #need this to be at least 10% of corpus to be considered a cluster
-    clustering = DBSCAN(eps=1, min_samples=len(corpus_vec)/10).fit(corpus_vector)
+    clustering = DBSCAN(eps=1, min_samples=len(corpus_vector)/25).fit(corpus_vector)
     return clustering.labels_
 
 def group_consecutives(vals, step=1):
@@ -127,13 +122,7 @@ def extractKeyPhrases(index, document, corpus_vec, important_words):
     
     return key_phrases
 
-def getTweetTopics(sentence):
-    #print(list(wordtags['report']))
-    with open('text_samples/justin bieber_good.txt', 'r') as myfile:
-        raw_text = myfile.read().replace('\n', '')
-
-    sentence_arr = raw_text.split(",,,")
-
+def getTweetTopics(sentence_arr):
     document = []
     for s in sentence_arr:
         newSentence = preprocessSentence(s)
@@ -167,15 +156,17 @@ def getTweetTopics(sentence):
                             phrase_freq[existing_phrase] = phrase_freq[existing_phrase] + 1
 
             for phrase in phrase_freq.keys():
-                #if phrase occurs in more than 20 percent of clusters
+                #if phrase occurs in more than 5 percent of clusters
                 #we should return it as a topic
-                if phrase_freq[phrase] > len(cluster_indices)/5:
+                if phrase_freq[phrase] > len(cluster_indices)/20 and len(phrase.split(" ")) > 1:
                     results.append(phrase)
 
     return results
-        
-                
-             
 
+def test():
+    with open('tweet_example.json', 'r') as f:
+        dict = json.load(f)
 
+    print(getTweetTopics(dict["bad_tweets"]))
+    print(getTweetTopics(dict["good_tweets"]))
 

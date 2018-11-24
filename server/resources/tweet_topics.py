@@ -125,34 +125,57 @@ def extractKeyPhrases(index, document, corpus_vec, important_words):
         
         key_phrases.append(key_phrase)
     
-    print(key_phrases)
-    
     return key_phrases
-    
-#print(list(wordtags['report']))
-with open('text_samples/justin bieber_good.txt', 'r') as myfile:
-    raw_text = myfile.read().replace('\n', '')
 
-sentence_arr = raw_text.split(",,,")
+def getTweetTopics(sentence):
+    #print(list(wordtags['report']))
+    with open('text_samples/justin bieber_good.txt', 'r') as myfile:
+        raw_text = myfile.read().replace('\n', '')
 
-document = []
-for s in sentence_arr:
-    newSentence = preprocessSentence(s)
-    if isinstance(newSentence, str) and len(newSentence) > 0:
-        document.append(preprocessSentence(s))
+    sentence_arr = raw_text.split(",,,")
 
-corpus_vec, important_words = getBagOfWords(document)
+    document = []
+    for s in sentence_arr:
+        newSentence = preprocessSentence(s)
+        if isinstance(newSentence, str) and len(newSentence) > 0:
+            document.append(preprocessSentence(s))
 
-lbls = runCluster(corpus_vec)
+    corpus_vec, important_words = getBagOfWords(document)
 
-for i in range(max(lbls) + 1):
-    #first check if vector representing first tweet in the cluster is an all 0 vector
-    #if so, diregard
-    firstInd = lbls.tolist().index(i)
-    if np.count_nonzero(corpus_vec[firstInd]) > 0:
-        cluster_indices = [j for j, x in enumerate(lbls) if x == i]
-        for cluster_ind in cluster_indices:
-             extractKeyPhrases(cluster_ind, document, corpus_vec, important_words)
+    lbls = runCluster(corpus_vec)
+
+    results = []
+
+    for i in range(max(lbls) + 1):
+        #first check if vector representing first tweet in the cluster is an all 0 vector
+        #if so, diregard
+        firstInd = lbls.tolist().index(i)
+        if np.count_nonzero(corpus_vec[firstInd]) > 0:
+            phrase_freq = {}
+            cluster_indices = [j for j, x in enumerate(lbls) if x == i]
+            for cluster_ind in cluster_indices:
+                key_phrases = extractKeyPhrases(cluster_ind, document, corpus_vec, important_words)
+                for phrase in key_phrases:
+                    if phrase in phrase_freq.keys():
+                        phrase_freq[phrase] = phrase_freq[phrase] + 1
+                    else:
+                        phrase_freq[phrase] = 1
+                    
+                    #handle the case where an existing phrase in the dict is contained in one of the key phrases
+                    for existing_phrase in phrase_freq.keys():
+                        if (existing_phrase in phrase) and (existing_phrase != phrase):
+                            phrase_freq[existing_phrase] = phrase_freq[existing_phrase] + 1
+
+            for phrase in phrase_freq.keys():
+                #if phrase occurs in more than 20 percent of clusters
+                #we should return it as a topic
+                if phrase_freq[phrase] > len(cluster_indices)/5:
+                    results.append(phrase)
+
+    return results
+        
+                
+             
 
 
 

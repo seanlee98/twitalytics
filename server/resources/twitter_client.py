@@ -3,6 +3,7 @@ from textblob import TextBlob
 from datetime import date, datetime, timedelta
 import twython
 from twython import Twython  
+from resources.tweet_topics import getTweetTopics
 
 class TwitterClient(object): 
 	''' 
@@ -125,6 +126,7 @@ class TwitterClient(object):
 						created_at = tweet["created_at"].split()
 						created_at = created_at[5] + "-" + str(self.Months[created_at[1]]) + "-" + created_at[2] + "T" + created_at[3][0] + created_at[3][1] + ":00:00"
 						sentiment = self.get_tweet_sentiment(tweet["text"]) 
+						print(sentiment)
 						intervals[created_at]["average_value"].append(sentiment)
 						if sentiment >= -100 and sentiment < -60:
 							intervals[created_at]["sentiments"]["Very_Bad"] += 1
@@ -150,6 +152,9 @@ class TwitterClient(object):
 				except Exception as e:
 					if "Rate limit exceeded" in str(e):
 						self.twitter_index += 1
+					elif "out of range" in str(e):
+						print("You have been throttled to death")
+						run = False
 					else:
 						run = False
 			for _,interval in intervals.items():
@@ -178,9 +183,11 @@ class TwitterClient(object):
 					}
 			) 
 			correct_shape = sorted(correct_shape, key=lambda k: k['interval']) 
-			return {"sentiments": correct_shape}
+			common_tweets = {"bad_tweets": getTweetTopics(list(set(bad_tweets))), "good_tweets": getTweetTopics(list(set(good_tweets)))}
+			return {"sentiments": correct_shape, "common_tweets": common_tweets}
 			# common_tweets = AUSTIN(bad_tweets, good_tweets)
 			# return {"sentiments": correct_shape, "common_tweets": common_tweets} 
 			
-		except Exception: 
+		except Exception as e: 
 			print("You done fucked up")
+			print(str(e))

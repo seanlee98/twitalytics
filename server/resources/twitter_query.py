@@ -1,9 +1,12 @@
 
-from flask_restful import Resource
+from flask_restful import Resource, request
+from resources.twitter_client import TwitterClient
 
 class TwitterQuery(Resource):
     def get(self):
-        return {"message": "Hello, World!"}
-        
-
+        args = request.args
+        query = args["query"]
+        api = TwitterClient()
+        return api.get_tweets(query)   
     
+

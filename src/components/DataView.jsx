@@ -24,10 +24,12 @@ class DataView extends Component {
     console.log("this is the length of datapoints: ", dataPoints.length);
     let dataArray = [];
     dataPoints.map((dataPoint, index) => {
-      dataArray.push({
-        x: index,
-        y: dataPoint.average_value
-      });
+      if (dataPoint.average_value !== 0) {
+        dataArray.push({
+          x: index,
+          y: dataPoint.average_value
+        });
+      }
     });
 
     return dataArray;

@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from "react";
 import ReactDOM from "react-dom";
+import { withRouter } from "react-router";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
@@ -8,6 +9,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import DataView from "./DataView";
 import { fetchTwitterData } from "../utils/ApiCalls";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = theme => ({
   root: {
@@ -24,18 +26,26 @@ const styles = theme => ({
 });
 
 class DataPage extends Component {
-  state = {
-    filter: "",
-    interval: "",
-    labelWidth: 0,
-    dataFilter: "Sentiment Analysis",
-    dataInterval: "Interval 1",
-    data: null
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      filter: "",
+      interval: "",
+      labelWidth: 0,
+      dataFilter: "Sentiment Analysis",
+      dataInterval: "Interval 1",
+      searchData: this.props.location.state.searchValue,
+      data: []
+    };
+  }
+
   async componentDidMount() {
-    const data = await fetchTwitterData();
+    console.log("props passed in from HomePage: ", this.props);
+    const data = await fetchTwitterData(this.state.searchData);
+    console.log("data retrieved from api call: ", data);
     this.setState({
-      labelWidth: 50
+      labelWidth: 50,
+      data: data.sentiments
     });
   }
 
@@ -56,45 +66,45 @@ class DataPage extends Component {
 
   render() {
     const { classes } = this.props;
-    const { dataFilter } = this.state;
-    const data = [
-      {
-        interval: "2018-11-20T19:00:00",
-        average_value: 20.0,
-        common_comments: ["this sucks", "this rocks"],
-        sentiments: {
-          Very_Bad: 0,
-          Bad: 9,
-          Average: 63,
-          Good: 23,
-          Very_Good: 5
-        }
-      },
-      {
-        interval: "2018-11-20T20:00:00",
-        average_value: 15.2,
-        common_comments: ["this sucks", "this rocks"],
-        sentiments: {
-          Very_Bad: 0,
-          Bad: 9,
-          Average: 34,
-          Good: 23,
-          Very_Good: 10
-        }
-      },
-      {
-        interval: "2018-11-20T21:00:00",
-        average_value: 17.8,
-        common_comments: ["this sucks", "this rocks"],
-        sentiments: {
-          Very_Bad: 1,
-          Bad: 9,
-          Average: 3,
-          Good: 23,
-          Very_Good: 53
-        }
-      }
-    ];
+    const { dataFilter, data } = this.state;
+    // const data = [
+    //   {
+    //     interval: "2018-11-20T19:00:00",
+    //     average_value: 20.0,
+    //     common_comments: ["this sucks", "this rocks"],
+    //     sentiments: {
+    //       Very_Bad: 0,
+    //       Bad: 9,
+    //       Average: 63,
+    //       Good: 23,
+    //       Very_Good: 5
+    //     }
+    //   },
+    //   {
+    //     interval: "2018-11-20T20:00:00",
+    //     average_value: 15.2,
+    //     common_comments: ["this sucks", "this rocks"],
+    //     sentiments: {
+    //       Very_Bad: 0,
+    //       Bad: 9,
+    //       Average: 34,
+    //       Good: 23,
+    //       Very_Good: 10
+    //     }
+    //   },
+    //   {
+    //     interval: "2018-11-20T21:00:00",
+    //     average_value: 17.8,
+    //     common_comments: ["this sucks", "this rocks"],
+    //     sentiments: {
+    //       Very_Bad: 1,
+    //       Bad: 9,
+    //       Average: 3,
+    //       Good: 23,
+    //       Very_Good: 53
+    //     }
+    //   }
+    // ];
 
     return (
       <Fragment>
@@ -157,8 +167,14 @@ class DataPage extends Component {
                 </FormControl>
               </form>
             )}
-
-            <DataView dataFilter={dataFilter} data={data} />
+            {data.length === 0 ? (
+              <div>
+                {" "}
+                <CircularProgress className={classes.progress} />
+              </div>
+            ) : (
+              <DataView dataFilter={dataFilter} data={data} />
+            )}
           </div>
         </div>
       </Fragment>

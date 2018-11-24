@@ -14,9 +14,13 @@ class TwitterClient(object):
 		Class constructor or initialization method. 
 		'''
 		# keys and tokens from the Twitter Dev Console 
-		account1 = {
+		account0 = {
 			"consumer_key": 'yxB1e2ilD3jWtfmq8xaNszGvi',
 			"consumer_secret": 'qBCvdycFsb5PwSiGSam5PPDOHGwViRrJcrdeUd6PmqS5TDn5up',
+		}
+		account1 = {
+			"consumer_key": 'vyOVChNpw0QFI9i3VbbD5DmQj',
+			"consumer_secret": 'AO3RPNUvmh8oZDQsxiCtubQtdCksiqS2ysSMu0xTuF0Bgp8Dxj',
 		}
 		account2 = {
 			"consumer_key": 'RWlq5oMusXJSwmgzCH3SLtii6',
@@ -42,10 +46,11 @@ class TwitterClient(object):
 		}
 		try: 
 			# Instantiate an object
+			python_tweets0 = Twython(account0["consumer_key"], account0["consumer_secret"])
 			python_tweets1 = Twython(account1["consumer_key"], account1["consumer_secret"])
 			python_tweets2 = Twython(account2["consumer_key"], account2["consumer_secret"])
 			python_tweets3 = Twython(account3["consumer_key"], account3["consumer_secret"])
-			self.python_tweets = [python_tweets1,python_tweets2,python_tweets3]
+			self.python_tweets = [python_tweets0,python_tweets1,python_tweets2,python_tweets3]
 			self.twitter_index = 0
 		except: 
 			print("Error: Authentication Failed") 
@@ -120,35 +125,38 @@ class TwitterClient(object):
 				try:
 					# call twitter api to fetch tweets 
 					fetched_tweets = self.python_tweets[self.twitter_index].search(**query)['statuses']
-					# add sentiments to correct bucket in time
-					for tweet in fetched_tweets:  
-						smallest_id = tweet["id"] if tweet["id"] < smallest_id else smallest_id
-						created_at = tweet["created_at"].split()
-						created_at = created_at[5] + "-" + str(self.Months[created_at[1]]) + "-" + created_at[2] + "T" + created_at[3][0] + created_at[3][1] + ":00:00"
-						sentiment = self.get_tweet_sentiment(tweet["text"]) 
-						print(sentiment)
-						intervals[created_at]["average_value"].append(sentiment)
-						if sentiment >= -100 and sentiment < -60:
-							intervals[created_at]["sentiments"]["Very_Bad"] += 1
-							bad_tweets.append(tweet["text"])
-						elif sentiment >= -60 and sentiment < -20:
-							intervals[created_at]["sentiments"]["Bad"] += 1
-							bad_tweets.append(tweet["text"])
-						elif sentiment >= -20 and sentiment < 20:
-							intervals[created_at]["sentiments"]["Average"] += 1
-						elif sentiment >= 20 and sentiment < 60:
-							intervals[created_at]["sentiments"]["Good"] += 1
-							good_tweets.append(tweet["text"])
-						elif sentiment >= 60 and sentiment <= 100:
-							intervals[created_at]["sentiments"]["Very_Good"] += 1
-							good_tweets.append(tweet["text"])
-					# call twitter api to fetch tweets 
-					query = {
-						'q': str(search_parameters),  
-						'count': 100,
-						'max_id': smallest_id,
-						'lang': 'en'
-					}
+					if len(fetched_tweets) == 0:
+						run = False
+					else:
+						# add sentiments to correct bucket in time
+						for tweet in fetched_tweets:  
+							smallest_id = tweet["id"] if tweet["id"] < smallest_id else smallest_id
+							created_at = tweet["created_at"].split()
+							created_at = created_at[5] + "-" + str(self.Months[created_at[1]]) + "-" + created_at[2] + "T" + created_at[3][0] + created_at[3][1] + ":00:00"
+							sentiment = self.get_tweet_sentiment(tweet["text"]) 
+							print(sentiment)
+							intervals[created_at]["average_value"].append(sentiment)
+							if sentiment >= -100 and sentiment < -60:
+								intervals[created_at]["sentiments"]["Very_Bad"] += 1
+								bad_tweets.append(tweet["text"])
+							elif sentiment >= -60 and sentiment < -20:
+								intervals[created_at]["sentiments"]["Bad"] += 1
+								bad_tweets.append(tweet["text"])
+							elif sentiment >= -20 and sentiment < 20:
+								intervals[created_at]["sentiments"]["Average"] += 1
+							elif sentiment >= 20 and sentiment < 60:
+								intervals[created_at]["sentiments"]["Good"] += 1
+								good_tweets.append(tweet["text"])
+							elif sentiment >= 60 and sentiment <= 100:
+								intervals[created_at]["sentiments"]["Very_Good"] += 1
+								good_tweets.append(tweet["text"])
+						# call twitter api to fetch tweets 
+						query = {
+							'q': str(search_parameters),  
+							'count': 100,
+							'max_id': smallest_id,
+							'lang': 'en'
+						}
 				except Exception as e:
 					if "Rate limit exceeded" in str(e):
 						self.twitter_index += 1
@@ -182,11 +190,10 @@ class TwitterClient(object):
 						"average_value": interval["average_value"], 
 					}
 			) 
-			correct_shape = sorted(correct_shape, key=lambda k: k['interval']) 
+			correct_shape = sorted(correct_shape, key=lambda k: k['interval'])
+			print("reached right before common_tweets")
 			common_tweets = {"bad_tweets": getTweetTopics(list(set(bad_tweets))), "good_tweets": getTweetTopics(list(set(good_tweets)))}
-			return {"sentiments": correct_shape, "common_tweets": common_tweets}
-			# common_tweets = AUSTIN(bad_tweets, good_tweets)
-			# return {"sentiments": correct_shape, "common_tweets": common_tweets} 
+			return {"sentiments": correct_shape, "common_tweets": common_tweets} 
 			
 		except Exception as e: 
 			print("You done fucked up")

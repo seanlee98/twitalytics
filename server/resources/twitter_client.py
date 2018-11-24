@@ -165,7 +165,7 @@ class TwitterClient(object):
 					}
 			) 
 			correct_shape = sorted(correct_shape, key=lambda k: k['interval']) 
-			return correct_shape
+			return {"sentiments": correct_shape}
 			# common_tweets = AUSTIN(bad_tweets, good_tweets)
 			# return {"sentiments": correct_shape, "common_tweets": common_tweets} 
 			

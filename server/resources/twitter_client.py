@@ -3,7 +3,7 @@ import tweepy
 from tweepy import OAuthHandler 
 from textblob import TextBlob 
 from datetime import date, datetime, timedelta
-import pytz
+
 class TwitterClient(object): 
 	''' 
 	Generic Twitter Class for sentiment analysis. 
@@ -117,7 +117,27 @@ class TwitterClient(object):
 					interval["average_value"] = total / num
 				else:
 					interval["average_value"] = 0
-			return intervals 
+
+			# frontend has asked for this response shape and so it shall be
+			correct_shape = []
+			for key,interval in intervals.items():
+				correct_shape.append(
+					{
+						"interval": key,
+						"sentiments": {
+							"Very Bad": interval["sentiments"]["Very Bad"],
+							"Bad": interval["sentiments"]["Bad"],
+							"Average": interval["sentiments"]["Average"],
+							"Good": interval["sentiments"]["Good"],
+							"Very Good": interval["sentiments"]["Very Good"],
+						}, 
+						"average_value": interval["average_value"], 
+						"common_comments": []
+					}
+			) 
+			correct_shape = sorted(correct_shape, key=lambda k: k['interval']) 
+
+			return correct_shape 
 			
 		except tweepy.TweepError as e: 
 			# print error (if any) 

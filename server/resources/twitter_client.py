@@ -13,11 +13,18 @@ class TwitterClient(object):
 		Class constructor or initialization method. 
 		'''
 		# keys and tokens from the Twitter Dev Console 
-		consumer_key = 'yxB1e2ilD3jWtfmq8xaNszGvi'
-		consumer_secret = 'qBCvdycFsb5PwSiGSam5PPDOHGwViRrJcrdeUd6PmqS5TDn5up'
-		access_token = '490837524-DLccK1bttilXgr5f9lVxDYiHhGvVIenEI3B8WWom'
-		access_token_secret = 'gi5VKYBBJp3UUFi7V2knyLwUNR3ZYCe4F95SNdBKSsvja'
-
+		account1 = {
+			"consumer_key": 'yxB1e2ilD3jWtfmq8xaNszGvi',
+			"consumer_secret": 'qBCvdycFsb5PwSiGSam5PPDOHGwViRrJcrdeUd6PmqS5TDn5up',
+		}
+		account2 = {
+			"consumer_key": 'RWlq5oMusXJSwmgzCH3SLtii6',
+			"consumer_secret": 'WRQ2md3RmGVzXsCMNxjvzaNhfZ2CuHOjsVLpIIHh8ADED8ZsvL',
+		}
+		account3 = {
+			"consumer_key": 'ENE70oiMDLwiv3CFJtNcLVXNx',
+			"consumer_secret": '33AU7pd8EJZgQAyMB2w8SybRCpNQyxXtX2v53KShYMhUhXnL2s',
+		}
 		self.Months = {
 			"Jan" : 1,
 			"Feb" : 2,
@@ -34,7 +41,11 @@ class TwitterClient(object):
 		}
 		try: 
 			# Instantiate an object
-			self.python_tweets = Twython(consumer_key, consumer_secret)
+			python_tweets1 = Twython(account1["consumer_key"], account1["consumer_secret"])
+			python_tweets2 = Twython(account2["consumer_key"], account2["consumer_secret"])
+			python_tweets3 = Twython(account3["consumer_key"], account3["consumer_secret"])
+			self.python_tweets = [python_tweets1,python_tweets2,python_tweets3]
+			self.twitter_index = 0
 		except: 
 			print("Error: Authentication Failed") 
 
@@ -106,9 +117,8 @@ class TwitterClient(object):
 			}
 			while run:
 				try:
-					# Create our query
 					# call twitter api to fetch tweets 
-					fetched_tweets = self.python_tweets.search(**query)['statuses']
+					fetched_tweets = self.python_tweets[self.twitter_index].search(**query)['statuses']
 					# add sentiments to correct bucket in time
 					for tweet in fetched_tweets:  
 						smallest_id = tweet["id"] if tweet["id"] < smallest_id else smallest_id
@@ -137,8 +147,11 @@ class TwitterClient(object):
 						'max_id': smallest_id,
 						'lang': 'en'
 					}
-				except Exception:
-					run = False
+				except Exception as e:
+					if "Rate limit exceeded" in str(e):
+						self.twitter_index += 1
+					else:
+						run = False
 			for _,interval in intervals.items():
 				if interval["average_value"]:
 					num = len(interval["average_value"])

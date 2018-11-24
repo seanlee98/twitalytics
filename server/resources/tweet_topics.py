@@ -44,13 +44,55 @@ def preprocessSentence(sentence):
 
     print(new)
 
-    return new 
+    return new
+
+
+def getWordFreq(corpus, index):
+    #accepts vectorized corpus and index of word 
+    #that we want freq of
+    #returns frequency of that word in the corpus
+    freq = 0
+    for sentence in corpus:
+        freq = freq + sentence[index]
+    
+    return freq
+
 
 def getBagOfWords(corpus):
     vectorizer = CountVectorizer()
     X = vectorizer.fit_transform(corpus)
-    print(vectorizer.get_feature_names())
-    print(X.toarray())  
+
+    corpus_vector = X.toarray()
+    print(corpus_vector)
+
+    corpus_words = vectorizer.get_feature_names()
+    print(corpus_words)
+
+    imp_word_indices = []
+    imp_words = []
+    for i, word in enumerate(corpus_words):
+        if 'VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word]):
+            imp_word_indices.append(i)
+            imp_words.append(word)
+            print(getWordFreq(corpus_vector, i))
+    
+    print(imp_word_indices)
+    print(imp_words)
+
+    corpus_vector_new = []
+    for sentence_vector in corpus_vector:
+        print(sentence_vector[imp_word_indices])
+        corpus_vector_new.append(sentence_vector[imp_word_indices])
+    
+    returnDict = {
+        "corpus_vector": corpus_vector_new,
+        "imp_words": imp_words
+    }
+
+    return returnDict
+
+def runCluster(corpus_vector):
+    
 
 #print(list(wordtags['report']))
 document = [preprocessSentence(test), preprocessSentence(test_rt)]

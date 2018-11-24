@@ -3,7 +3,7 @@ import tweepy
 from tweepy import OAuthHandler 
 from textblob import TextBlob 
 from datetime import date, datetime, timedelta
-
+import pytz
 class TwitterClient(object): 
 	''' 
 	Generic Twitter Class for sentiment analysis. 
@@ -61,19 +61,32 @@ class TwitterClient(object):
 		'''
 		# empty list to store parsed tweets 
 		intervals = {} 
-		current_time = datetime.now()
+		current_time = datetime.utcnow()
 		current_time = current_time.replace(second=0, microsecond=0, minute=0, hour=current_time.hour)
-		sentiments = {
-			"-100": 0,
-			"-60": 0,
-			"-20": 0,
-			"20": 0,
-			"60": 0,
-		}
+		intervals[self.json_serial(current_time)] = {
+				"sentiments": {
+					"Very Bad": 0,
+					"Bad": 0,
+					"Average": 0,
+					"Good": 0,
+					"Very Good": 0,
+				}, 
+				"average_value": [], 
+				"common_comments": []
+			}
 		for _ in range(168):
 			current_time = self.subtract_hour_from_datetime(current_time)
-			intervals[self.json_serial(current_time)] = {"sentiments": sentiments, "average_value": [], "common_comments": []}
-
+			intervals[self.json_serial(current_time)] = {
+				"sentiments": {
+					"Very Bad": 0,
+					"Bad": 0,
+					"Average": 0,
+					"Good": 0,
+					"Very Good": 0,
+				}, 
+				"average_value": [], 
+				"common_comments": []
+			}
 		try: 
 			# call twitter api to fetch tweets 
 			fetched_tweets = self.api.search(q = query, count = count) 
@@ -81,20 +94,20 @@ class TwitterClient(object):
 			# add sentiments to correct bucket in time
 			for tweet in fetched_tweets:  
 				created_at = tweet.created_at
-				created_at = self.json_serial(current_time.replace(second=0, microsecond=0, minute=0, hour=created_at.hour))
+				created_at = self.json_serial(created_at.replace(second=0, microsecond=0, minute=0, hour=created_at.hour))
 				sentiment = self.get_tweet_sentiment(tweet.text) 
 				intervals[created_at]["average_value"].append(sentiment)
 				if sentiment >= -100 and sentiment < -60:
-					intervals[created_at]["sentiments"]["-100"] += 1
+					intervals[created_at]["sentiments"]["Very Bad"] += 1
 				elif sentiment >= -60 and sentiment < -20:
-					intervals[created_at]["sentiments"]["-60"] += 1
+					intervals[created_at]["sentiments"]["Bad"] += 1
 				elif sentiment >= -20 and sentiment < 20:
-					intervals[created_at]["sentiments"]["-20"] += 1
+					intervals[created_at]["sentiments"]["Average"] += 1
 				elif sentiment >= 20 and sentiment < 60:
-					intervals[created_at]["sentiments"]["20"] += 1
+					intervals[created_at]["sentiments"]["Good"] += 1
 				elif sentiment >= 60 and sentiment <= 100:
-					intervals[created_at]["sentiments"]["60"] += 1
-
+					intervals[created_at]["sentiments"]["Very Good"] += 1
+				
 			for _,interval in intervals.items():
 				if interval["average_value"]:
 					num = len(interval["average_value"])

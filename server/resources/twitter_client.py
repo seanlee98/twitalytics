@@ -87,27 +87,40 @@ class TwitterClient(object):
 				"average_value": [], 
 				"common_comments": []
 			}
+		austin =  {
+					"Very Bad": [],
+					"Bad": [],
+					"Average": [],
+					"Good": [],
+					"Very Good": [],
+				}
 		try: 
 			# call twitter api to fetch tweets 
 			fetched_tweets = self.api.search(q = query, count = count) 
 
 			# add sentiments to correct bucket in time
 			for tweet in fetched_tweets:  
+				austin_text = self.clean_tweet(tweet.text)
 				created_at = tweet.created_at
 				created_at = self.json_serial(created_at.replace(second=0, microsecond=0, minute=0, hour=created_at.hour))
 				sentiment = self.get_tweet_sentiment(tweet.text) 
 				intervals[created_at]["average_value"].append(sentiment)
 				if sentiment >= -100 and sentiment < -60:
+					austin["Very Bad"].append(austin_text)
 					intervals[created_at]["sentiments"]["Very Bad"] += 1
 				elif sentiment >= -60 and sentiment < -20:
+					austin["Bad"].append(austin_text)
 					intervals[created_at]["sentiments"]["Bad"] += 1
 				elif sentiment >= -20 and sentiment < 20:
+					austin["Average"].append(austin_text)
 					intervals[created_at]["sentiments"]["Average"] += 1
 				elif sentiment >= 20 and sentiment < 60:
+					austin["Good"].append(austin_text)
 					intervals[created_at]["sentiments"]["Good"] += 1
 				elif sentiment >= 60 and sentiment <= 100:
+					austin["Very Good"].append(austin_text)
 					intervals[created_at]["sentiments"]["Very Good"] += 1
-				
+			return austin
 			for _,interval in intervals.items():
 				if interval["average_value"]:
 					num = len(interval["average_value"])

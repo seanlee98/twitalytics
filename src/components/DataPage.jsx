@@ -30,12 +30,11 @@ class DataPage extends Component {
     super(props);
     this.state = {
       filter: "",
-      interval: "",
+      interval: "null",
       labelWidth: 0,
       dataFilter: "Sentiment Analysis",
-      dataInterval: "Interval 1",
+      data: [],
       searchData: this.props.location.state.searchValue,
-      data: []
     };
   }
 
@@ -45,66 +44,60 @@ class DataPage extends Component {
     console.log("data retrieved from api call: ", data);
     this.setState({
       labelWidth: 50,
-      data: data.sentiments
+      data: data.sentiments,
+      isDataRetrieved: true
     });
   }
 
-  handleChange = event => {
+  handleGraphChange = event => {
     const value = event.target.value;
-    if (value.includes("Sentiment")) {
-      this.setState({
-        dataFilter: value,
-        [event.target.name]: value
+    this.setState({
+      dataFilter: value,
+      [event.target.name]: value
+    });
+  };
+
+  handleIntervalChange = event => {
+    const value = event.target.value;
+    this.setState({
+      dataInterval: value,
+      [event.target.name]: value
+    });
+  }
+
+  createIntervalList(data) {
+    if(data){
+      let intervals = [];
+      data.map((dataPoint, index) => {
+        intervals.push(dataPoint.interval);
       });
-    } else {
-      this.setState({
-        dataInterval: value,
-        [event.target.name]: value
+      return intervals;
+    }
+    else{
+      return [];
+    }
+  }
+
+  filterData(data) {
+    let filteredData = [];
+    if (this.state.filter.includes("Sentiment Analysis")) {
+      filteredData = data;
+    }
+    else {
+      data.map((dataPoint, index) => {
+        if (dataPoint.interval.includes(this.state.interval)) {
+          filteredData.push(dataPoint);
+        }
       });
     }
-  };
+
+    return filteredData;
+  }
 
   render() {
     const { classes } = this.props;
     const { dataFilter, data } = this.state;
-    // const data = [
-    //   {
-    //     interval: "2018-11-20T19:00:00",
-    //     average_value: 20.0,
-    //     common_comments: ["this sucks", "this rocks"],
-    //     sentiments: {
-    //       Very_Bad: 0,
-    //       Bad: 9,
-    //       Average: 63,
-    //       Good: 23,
-    //       Very_Good: 5
-    //     }
-    //   },
-    //   {
-    //     interval: "2018-11-20T20:00:00",
-    //     average_value: 15.2,
-    //     common_comments: ["this sucks", "this rocks"],
-    //     sentiments: {
-    //       Very_Bad: 0,
-    //       Bad: 9,
-    //       Average: 34,
-    //       Good: 23,
-    //       Very_Good: 10
-    //     }
-    //   },
-    //   {
-    //     interval: "2018-11-20T21:00:00",
-    //     average_value: 17.8,
-    //     common_comments: ["this sucks", "this rocks"],
-    //     sentiments: {
-    //       Very_Bad: 1,
-    //       Bad: 9,
-    //       Average: 3,
-    //       Good: 23,
-    //       Very_Good: 53
-    //     }
-    //   }
-    // ];
+    const intervals = this.createIntervalList(data);
 
     return (
       <Fragment>
@@ -115,8 +108,8 @@ class DataPage extends Component {
                 <FormControl className={classes.formControl}>
                   <InputLabel htmlFor="filter-simple">Filter</InputLabel>
                   <Select
-                    value={this.state.filter}
-                    onChange={this.handleChange}
+                    value={this.state.dataFilter}
+                    onChange={this.handleGraphChange}
                     inputProps={{
                       name: "filter",
                       id: "filter-simple"
@@ -136,8 +129,8 @@ class DataPage extends Component {
                 <FormControl className={classes.formControl}>
                   <InputLabel htmlFor="filter-simple">Filter</InputLabel>
                   <Select
-                    value={this.state.filter}
-                    onChange={this.handleChange}
+                    value={this.state.dataFilter}
+                    onChange={this.handleGraphChange}
                     inputProps={{
                       name: "filter",
                       id: "filter-simple"
@@ -154,15 +147,16 @@ class DataPage extends Component {
                 <FormControl className={classes.formControl}>
                   <InputLabel htmlFor="filter-simple">Interval</InputLabel>
                   <Select
+                    onChange={this.handleIntervalChange}
                     value={this.state.interval}
-                    onChange={this.handleChange}
                     inputProps={{
                       name: "interval",
                       id: "interval-simple"
                     }}
                   >
-                    <MenuItem value={"Interval 1"}>Interval 1</MenuItem>
-                    <MenuItem value={"Interval 2"}>Interval 2</MenuItem>
+                    {
+                      intervals.map((interval,i) => (<MenuItem value={interval} >{interval}</MenuItem>))
+                    }
                   </Select>
                 </FormControl>
               </form>
@@ -173,7 +167,7 @@ class DataPage extends Component {
                 <CircularProgress className={classes.progress} />
               </div>
             ) : (
-              <DataView dataFilter={dataFilter} data={data} />
+              <DataView dataFilter={dataFilter} data={this.filterData(data)} />
             )}
           </div>
         </div>

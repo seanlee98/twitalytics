@@ -23,9 +23,25 @@ class DataView extends Component {
     };
   }
 
+  formatBarDataPoints(data) {
+    const dataPoints = data;
+    let dataArray = []
+
+    dataPoints.map((dataPoint, index) => {
+      const sentiments = dataPoint.sentiments;
+      for (var index in sentiments) {
+        dataArray.push ({
+          x: index,
+          y: sentiments[index]
+        });
+      }
+    });
+
+    return dataArray;
+  }
+
   formatLineDataPoints(data) {
     const dataPoints = data;
-    console.log("this is the length of datapoints: ", dataPoints.length);
     let dataArray = [];
     dataPoints.map((dataPoint, index) => {
       if (dataPoint.average_value !== 0) {
@@ -48,14 +64,44 @@ class DataView extends Component {
     return dataArray;
   }
 
-  formatBarDataPoints(data) {}
-
   render() {
     const { dataFilter, data } = this.props;
+
     const { commonComments, topDataPoint, bottomDataPoint } = this.state;
 
-    const dataPoints = this.formatLineDataPoints(data);
+    let dataPoints = [];
     console.log("Datapoints: ", dataPoints);
+
+    const chartWidth = 800;
+    const chartHeight = 500;
+    const chartDomain = [0, chartHeight];
+    const interval = 0;
+    /// Response Data
+    // {
+    //   interval: "2018-11-20T21:00:00",
+    //   average_value: 17.8,
+    //   common_comments: ["this sucks", "this rocks"],
+    //   sentiments: {
+    //     Very_Bad: 1,
+    //     Bad: 9,
+    //     Average: 3,
+    //     Good: 23,
+    //     Very_Good: 53
+    //   }
+    // }
+
+    /// Need to convert to
+    // [{x: 1, y: 10}, {x: 2, y: 7}, {x: 3, y: 15}]
+
+    /// what I'm actually returning
+    // [{x: 1}, {y: 10}, {x: 2}, {y: 7}, {x: 3}, {y: 15}]
+    if (dataFilter.includes("Sentiment Analysis")) {
+      dataPoints = this.formatLineDataPoints(data);
+    }
+    else {
+      dataPoints = this.formatBarDataPoints(data);
+    }
+
 
     return (
       <Fragment>
@@ -70,13 +116,12 @@ class DataView extends Component {
             >
               <VerticalGridLines />
               <HorizontalGridLines />
-              <XAxis title="Number of Intervals" />
-              <YAxis title="Average Sentiment Score" />
+              <XAxis title="Period of Time (Last Seven Days)"/>
+              <YAxis title="Average Sentiment Score"/>
               <LineSeries
                 onNearestX={(datapoint, index) => {
                   // does something on mouseover
                   // you can access the value of the event
-                  console.log("data: ", data);
                   this.setState({ commonComments: data.map(d => d[index]) });
                 }}
                 data={dataPoints}
@@ -96,12 +141,17 @@ class DataView extends Component {
           </div>
         ) : (
           <div>
-            <XYPlot height={600} width={600} xDomain={[0, 9]}>
+            <XYPlot
+               xType={"ordinal"}
+               width={500}
+               height={300}
+               yDomain={[0, 300]}
+            >
               <VerticalGridLines />
               <HorizontalGridLines />
-              <XAxis />
-              <YAxis />
-              <VerticalBarSeries data={this.props.data} />
+              <XAxis title="Sentiment Category"/>
+              <YAxis title="Number of Tweets"/>
+              <VerticalBarSeries data={dataPoints} />
             </XYPlot>
           </div>
         )}

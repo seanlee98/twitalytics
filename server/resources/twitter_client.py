@@ -118,18 +118,18 @@ class TwitterClient(object):
 						intervals[created_at]["average_value"].append(sentiment)
 						if sentiment >= -100 and sentiment < -60:
 							intervals[created_at]["sentiments"]["Very_Bad"] += 1
-							bad_tweets.append(tweet.text)
+							bad_tweets.append(tweet["text"])
 						elif sentiment >= -60 and sentiment < -20:
 							intervals[created_at]["sentiments"]["Bad"] += 1
-							bad_tweets.append(tweet.text)
+							bad_tweets.append(tweet["text"])
 						elif sentiment >= -20 and sentiment < 20:
 							intervals[created_at]["sentiments"]["Average"] += 1
 						elif sentiment >= 20 and sentiment < 60:
 							intervals[created_at]["sentiments"]["Good"] += 1
-							good_tweets.append(tweet.text)
+							good_tweets.append(tweet["text"])
 						elif sentiment >= 60 and sentiment <= 100:
 							intervals[created_at]["sentiments"]["Very_Good"] += 1
-							good_tweets.append(tweet.text)
+							good_tweets.append(tweet["text"])
 					# call twitter api to fetch tweets 
 					query = {
 						'q': str(search_parameters),  

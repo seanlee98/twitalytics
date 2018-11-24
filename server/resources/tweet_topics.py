@@ -42,8 +42,6 @@ def preprocessSentence(sentence):
     #convert to only lowercase
     new = new.lower()
 
-    print(new)
-
     return new
 
 
@@ -63,10 +61,7 @@ def getBagOfWords(corpus):
     X = vectorizer.fit_transform(corpus)
 
     corpus_vector = X.toarray()
-    print(corpus_vector)
-
     corpus_words = vectorizer.get_feature_names()
-    print(corpus_words)
 
     imp_word_indices = []
     imp_words = []
@@ -75,27 +70,24 @@ def getBagOfWords(corpus):
             imp_word_indices.append(i)
             imp_words.append(word)
             print(getWordFreq(corpus_vector, i))
-    
-    print(imp_word_indices)
-    print(imp_words)
 
     corpus_vector_new = []
     for sentence_vector in corpus_vector:
-        print(sentence_vector[imp_word_indices])
         corpus_vector_new.append(sentence_vector[imp_word_indices])
     
-    returnDict = {
-        "corpus_vector": corpus_vector_new,
-        "imp_words": imp_words
-    }
+    corpus_vector_new = np.array(corpus_vector_new)
 
-    return returnDict
+    return [corpus_vector_new, imp_words]
 
 def runCluster(corpus_vector):
-    
+    #eps = The maximum distance between two samples for them to be considered as in the same neighborhood.
+    #min_samples = number of samples (or total weight) in a neighborhood for a point to be considered as a core point
+    clustering = DBSCAN(eps=3, min_samples=2).fit(corpus_vector)
+    print(clustering.labels_)
 
 #print(list(wordtags['report']))
 document = [preprocessSentence(test), preprocessSentence(test_rt)]
-getBagOfWords(document)
+corpus_vec, important_words = getBagOfWords(document)
+runCluster(corpus_vec)
 
 

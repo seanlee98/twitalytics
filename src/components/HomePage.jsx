@@ -3,15 +3,13 @@ import PropTypes from "prop-types";
 import classNames from "classnames";
 import { withStyles } from "@material-ui/core/styles";
 import "../App.css";
-import ReactDOM from "react-dom";
-import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
 import MenuItem from "@material-ui/core/MenuItem";
-import { Link } from "react-router-dom";
 import Input from "@material-ui/core/Input";
+import NavBar from "./NavBar";
+import Typography from "@material-ui/core/Typography";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+import { Carousel } from "react-responsive-carousel";
 
 const styles = theme => ({
   root: {
@@ -67,7 +65,6 @@ class HomePage extends Component {
 
   render() {
     const { classes } = this.props;
-    const { value } = this.state;
 
     const title = {
       marginTop: "50px"
@@ -80,13 +77,7 @@ class HomePage extends Component {
     return (
       <Fragment>
         <div className={classes.root}>
-          <AppBar position="static">
-            <Tabs value={value} onChange={this.handleChange}>
-              <Tab label="Dash" />
-              <Tab label="Data" />
-              />
-            </Tabs>
-          </AppBar>
+          <NavBar />
           <Grid
             container
             spacing={24}
@@ -95,11 +86,19 @@ class HomePage extends Component {
             direction="column"
           >
             <Grid item xs={12}>
-              <div style={title}>DASHBoard</div>
+              <div className="main-title">
+                <Typography variant="h1">Twitalytics</Typography>
+              </div>
+              <div className="sub-title">
+                <Typography varient="h3">
+                  See what the Twitter-verse is saying about your latest
+                  product!
+                </Typography>
+              </div>
             </Grid>
-            <form className={classes.container} noValidate autoComplete="off">
-              <Grid container spacing={24} justify="center" alignItems="center">
-                <Grid item xs={6}>
+            <Grid spacing={24}>
+              <Grid item xs={6}>
+                <div className="search-container">
                   <Input
                     placeholder="Enter Search Term"
                     className={classes.input}
@@ -107,9 +106,54 @@ class HomePage extends Component {
                     onChange={this.handleChange}
                     onKeyPress={this.handleSubmit.bind(this)}
                   />
-                </Grid>
+                </div>
               </Grid>
-            </form>
+            </Grid>
+            <Grid spacing={24}>
+              <Grid item>
+                <div className="carousel-container">
+                  <Carousel
+                    showThumbs={false}
+                    showArrows={false}
+                    infiniteLoop
+                    interval={5000}
+                    dynamicHeight
+                    autoPlay
+                  >
+                    <div className="img-container">
+                      <img
+                        src="http://www.getspokal.com/wp-content/uploads/2014/08/wpid-baa-2.jpg"
+                        alt=""
+                      />
+                    </div>
+                    <div className="img-container">
+                      <img
+                        src="https://weareshootingstar.co.uk/admin/resources/blog/tweet-2.bmp"
+                        alt=""
+                      />
+                    </div>
+                    <div className="img-container">
+                      <img
+                        src="https://static.businessinsider.com/image/4d488a0749e2ae1e4b140000/image.jpg"
+                        alt=""
+                      />
+                    </div>
+                    <div className="img-container">
+                      <img
+                        src="https://i2-prod.mirror.co.uk/incoming/article10794254.ece/ALTERNATES/s615b/PROD-cJPG.jpg"
+                        alt=""
+                      />
+                    </div>
+                    <div className="img-container">
+                      <img
+                        src="https://cpb-eu-w2.wpmucdn.com/blogs.brighton.ac.uk/dist/5/2561/files/2017/02/Image-2-19dj678.png"
+                        alt=""
+                      />
+                    </div>
+                  </Carousel>
+                </div>
+              </Grid>
+            </Grid>
           </Grid>
         </div>
       </Fragment>

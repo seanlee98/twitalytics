@@ -25,12 +25,12 @@ class DataView extends Component {
 
   formatBarDataPoints(data) {
     const dataPoints = data;
-    let dataArray = []
+    let dataArray = [];
 
     dataPoints.map((dataPoint, index) => {
       const sentiments = dataPoint.sentiments;
       for (var index in sentiments) {
-        dataArray.push ({
+        dataArray.push({
           x: index,
           y: sentiments[index]
         });
@@ -97,11 +97,9 @@ class DataView extends Component {
     // [{x: 1}, {y: 10}, {x: 2}, {y: 7}, {x: 3}, {y: 15}]
     if (dataFilter.includes("Sentiment Analysis")) {
       dataPoints = this.formatLineDataPoints(data);
-    }
-    else {
+    } else {
       dataPoints = this.formatBarDataPoints(data);
     }
-
 
     return (
       <Fragment>
@@ -109,15 +107,15 @@ class DataView extends Component {
           <div>
             <XYPlot
               height={600}
-              width={600}
+              width={1000}
               xDomain={[0, dataPoints.length - 1]}
               yDomain={[-100, 100]}
               onMouseLeave={() => this.setState({ commonComments: [] })}
             >
               <VerticalGridLines />
               <HorizontalGridLines />
-              <XAxis title="Period of Time (Last Seven Days)"/>
-              <YAxis title="Average Sentiment Score"/>
+              <XAxis title="Period of Time (Last Seven Days)" />
+              <YAxis title="Average Sentiment Score" />
               <LineSeries
                 onNearestX={(datapoint, index) => {
                   // does something on mouseover
@@ -142,15 +140,15 @@ class DataView extends Component {
         ) : (
           <div>
             <XYPlot
-               xType={"ordinal"}
-               width={500}
-               height={300}
-               yDomain={[0, 300]}
+              xType={"ordinal"}
+              width={500}
+              height={300}
+              yDomain={[0, 300]}
             >
               <VerticalGridLines />
               <HorizontalGridLines />
-              <XAxis title="Sentiment Category"/>
-              <YAxis title="Number of Tweets"/>
+              <XAxis title="Sentiment Category" />
+              <YAxis title="Number of Tweets" />
               <VerticalBarSeries data={dataPoints} />
             </XYPlot>
           </div>

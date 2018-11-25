@@ -114,10 +114,21 @@ class DataPage extends Component {
             {data.length === 0 ? (
               // Case where data hasn't been returned
               // Render a loading spinner
-              <div>
-                {" "}
-                <CircularProgress className={classes.progress} />
-              </div>
+              <Grid
+                container
+                justify="center"
+                alignItems="center"
+                direction="column"
+              >
+                <div className="loading-container">
+                  {" "}
+                  <CircularProgress
+                    className={classes.progress}
+                    size={100}
+                    thickness={4.0}
+                  />
+                </div>
+              </Grid>
             ) : (
               // Case where we have received data from the api call
               // Need to decide which component to render based on our this.state.dataFilterPage

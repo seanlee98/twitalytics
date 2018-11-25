@@ -63,10 +63,9 @@ def getBagOfWords(corpus):
     for i, word in enumerate(corpus_words):
         #only want words that appear in more than 4% of the corpus
         #and nouns/verbs/adjectives to appear in our bag of words 
-        if ('NOUN' in list(wordtags[word]) or 'VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word])) and (getWordFreq(corpus_vector, i) > (min(len(corpus_vector)/25), 20)):
+        if ('NOUN' in list(wordtags[word]) or 'VERB' in list(wordtags[word]) or 'ADJ' in list(wordtags[word])) and getWordFreq(corpus_vector, i) > min(len(corpus_vector)/25, 100):
             imp_word_indices.append(i)
             imp_words.append(word)
-            print(getWordFreq(corpus_vector, i))
 
     corpus_vector_new = []
     for sentence_vector in corpus_vector:
@@ -79,8 +78,8 @@ def getBagOfWords(corpus):
 def runCluster(corpus_vector):
     #eps = The maximum distance between two samples for them to be considered as in the same neighborhood.
     #min_samples = number of samples (or total weight) in a neighborhood for a point to be considered as a core point
-    #need this to be at least 10% of corpus to be considered a cluster
-    clustering = DBSCAN(eps=1, min_samples=min(len(corpus_vector)/25), 40).fit(corpus_vector)
+    #need this to be at least 2% of corpus to be considered a cluster
+    clustering = DBSCAN(eps=1, min_samples=min(len(corpus_vector)/50, 25)).fit(corpus_vector)
     return clustering.labels_
 
 def group_consecutives(vals, step=1):
@@ -111,14 +110,18 @@ def extractKeyPhrases(index, document, corpus_vec, important_words):
     consecutive_key_words = group_consecutives(key_word_positions)
     key_phrases = []
     for phrase_location in consecutive_key_words:
-        phrase_arr = word_arr[phrase_location[0]:phrase_location[-1] + 1]
-        key_phrase = ""
-        for i, word in enumerate(phrase_arr):
-            key_phrase = key_phrase + word
-            if i != len(phrase_arr) - 1:
-                key_phrase = key_phrase + " "
-        
-        key_phrases.append(key_phrase)
+        if len(phrase_location) > 0:
+            if(phrase_location[-1] + 1 > len(word_arr)):
+                phrase_arr = word_arr[phrase_location[0]:]
+            else:
+                phrase_arr = word_arr[phrase_location[0]:phrase_location[-1] + 1]
+                key_phrase = ""
+                for i, word in enumerate(phrase_arr):
+                    key_phrase = key_phrase + word
+                    if i != len(phrase_arr) - 1:
+                        key_phrase = key_phrase + " "
+                
+                key_phrases.append(key_phrase)
     
     return key_phrases
 
@@ -173,5 +176,4 @@ def test():
     print(getTweetTopics(dict["bad_tweets"]))
     print(getTweetTopics(dict["good_tweets"]))
 
-test()
 

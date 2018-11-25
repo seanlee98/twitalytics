@@ -58,6 +58,10 @@ img {
   height: 250px;
 }
 
+.loading-container {
+  margin-top: 150px;
+}
+
 .legend-container {
   margin-top: 25px;
   margin-bottom: 15px;

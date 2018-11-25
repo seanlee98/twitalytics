@@ -9,6 +9,9 @@ import {
   YAxis
 } from "react-vis";
 import "../../node_modules/react-vis/dist/style.css";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
 
 class TweetsOverTimePage extends Component {
   // Response data
@@ -36,15 +39,22 @@ class TweetsOverTimePage extends Component {
       goodCountArray: [],
       veryGoodCountArray: []
     };
+    this.maxTweetCount = 0;
   }
 
   formatLineDataPoints(data, dataType) {
     let dataArray = [];
     const dataPoints = data;
+    let maxTweetCount = this.maxTweetCount;
+    console.log("formatLineDataPoints: ", data);
     dataPoints.map((dataPoint, index) => {
       if (dataPoint.average_value !== 0) {
         if (dataType.includes("totalCount")) {
           // handle totalCountArray
+          if (maxTweetCount < dataPoint.count) {
+            // keep track of largest count for y-axis scaling
+            maxTweetCount = dataPoint.count;
+          }
           dataArray.push({
             x: index,
             y: dataPoint.count
@@ -83,6 +93,10 @@ class TweetsOverTimePage extends Component {
       }
     });
 
+    if (dataType.includes("totalCount")) {
+      this.maxTweetCount = maxTweetCount;
+    }
+
     return dataArray;
   }
 
@@ -98,48 +112,64 @@ class TweetsOverTimePage extends Component {
       veryGoodCountArray
     } = this.state;
 
-    totalCountArray = this.formatLineDataPoints(data.sentiment, "totalCount");
-    veryBadCountArray = this.formatLineDataPoints(data.sentiment, "veryBad");
-    badCountArray = this.formatLineDataPoints(data.sentiment, "bad");
+    totalCountArray = this.formatLineDataPoints(data.sentiments, "totalCount");
+    veryBadCountArray = this.formatLineDataPoints(data.sentiments, "veryBad");
+    badCountArray = this.formatLineDataPoints(data.sentiments, "bad");
     averageCountArray = this.formatLineDataPoints(
-      data.sentiment,
+      data.sentiments,
       "averageCountArray"
     );
     goodCountArray = this.formatLineDataPoints(
-      data.sentiment,
+      data.sentiments,
       "goodCountArray"
     );
     veryGoodCountArray = this.formatLineDataPoints(
-      data.sentiment,
+      data.sentiments,
       "veryGoodCountArray"
     );
 
-    console.log("totalCountArray: ", totalCountArray);
-    console.log("veryBadCountArray: ", veryBadCountArray);
-    console.log("badCountArray: ", badCountArray);
-    console.log("averageCountArray: ", averageCountArray);
-    console.log("goodCountArray: ", goodCountArray);
-    console.log("veryGoodCountArray: ", veryGoodCountArray);
-
     return (
       <Fragment>
-        <XYPlot
-          height={900}
-          width={600}
-          xDomain={[0, totalCountArray.length - 1]}
-          yDomain={[0, 1000]}
-        >
-          <VerticalGridLines />
-          <HorizontalGridLines />
-          <XAxis title="Period of Time (Last Seven Days)" />
-          <YAxis title="Total Count (Number of Tweets)" />
-          <LineSeries data={totalCountArray} color="red" />
-          <LineSeries data={veryBadCountArray} color="orange" />
-          <LineSeries data={badCountArray} color="yellow" />
-          <LineSeries data={averageCountArray} color="green" />
-          <LineSeries data={goodCountArray} color="blue" />
-          <LineSeries data={veryGoodCountArray} color="black" />
-        </XYPlot>
+        <div className="graph-container">
+          <XYPlot
+            height={900}
+            width={900}
+            xDomain={[0, totalCountArray.length - 1]}
+            yDomain={[0, this.maxTweetCount]}
+          >
+            <VerticalGridLines />
+            <HorizontalGridLines />
+            <XAxis title="Period of Time (Last Seven Days)" />
+            <YAxis title="Tweet Category Count (Number of Tweets)" />
+            <LineSeries data={totalCountArray} color="black" />
+            <LineSeries data={veryBadCountArray} color="#ed553b" />
+            <LineSeries data={badCountArray} color="#173f5f" />
+            <LineSeries data={averageCountArray} color="#20639b" />
+            <LineSeries data={goodCountArray} color="#f6d55c" />
+            <LineSeries data={veryGoodCountArray} color="#3caea3" />
+          </XYPlot>
+        </div>
+        <div className="legend-container">
+          <Card>
+            <CardContent>
+              <Typography component="p" variant="h3">
+                Legend
+              </Typography>
+              <br />
+              <font color="black">Total Count</font>
+              <br />
+              <font color="#ed553b">Very Bad Category</font>
+              <br />
+              <font color="#173f5f">Bad Category</font>
+              <br />
+              <font color="#20639b">Average Category</font>
+              <br />
+              <font color="#f6d55c">Good Category</font>
+              <br />
+              <font color="#3caea3">Very Good Category</font>
+            </CardContent>
+          </Card>
+        </div>
       </Fragment>
     );
   }

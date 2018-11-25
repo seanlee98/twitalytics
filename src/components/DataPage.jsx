@@ -47,11 +47,11 @@ class DataPage extends Component {
     console.log("data retrieved from api call: ", data);
     this.setState({
       labelWidth: 50,
-      data: data.sentiments
+      data: data
     });
   }
 
-  handleDataPageChance = event => {
+  handleDataPageChange = event => {
     const page = event.target.value;
     this.setState({
       dataFilterPage: page,

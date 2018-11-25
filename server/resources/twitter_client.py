@@ -148,14 +148,14 @@ class TwitterClient(object):
 							created_at = created_at[5] + "-" + str(self.Months[created_at[1]]) + "-" + created_at[2] + "T" + created_at[3][0] + created_at[3][1] + ":00:00"
 							sentiment = self.get_tweet_sentiment(tweet["text"]) 
 							print(sentiment)
-							if tweet["text"][0] == 'R' and tweet["text"][1] == 'T':
+							if tweet["text"][:3] == 'RT ':
 								retweeted_text = tweet_frequency["text"][3:]
 							else:
 								retweeted_text = tweet["text"]
 							if retweeted_text in tweet_frequency:
 								tweet_frequency[retweeted_text] += 1
 							else:
-								tweet_frequency[tweet["text"]] = 1
+								tweet_frequency[retweeted_text] = 1
 							intervals[created_at]["average_value"].append(sentiment)
 							if sentiment >= -100 and sentiment < -60:
 								intervals[created_at]["sentiments"]["Very Bad"] += 1
@@ -211,7 +211,7 @@ class TwitterClient(object):
 			# frontend has asked for this response shape and so it shall be
 			correct_shape = []
 			for key, interval in intervals.items():
-				total = 0
+				count = 0
 				for _, amount in interval["sentiments"].items():
 					count += amount
 				correct_shape.append(

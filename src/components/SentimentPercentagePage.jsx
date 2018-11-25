@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import "../../node_modules/react-vis/dist/style.css";
 import Card from "@material-ui/core/Card";
+import CardMedia from '@material-ui/core/CardMedia';
 import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import FormControl from "@material-ui/core/FormControl";
@@ -35,16 +36,22 @@ const styles = theme => ({
       marginTop: theme.spacing.unit * 2
     },
     horizontalSpacer: {
-        marginLeft: 24,
-        marginRight: 24
+        marginLeft: 32,
+        marginRight: 32
+    },
+    verticalSpacer: {
+        marginTop: 12,
+        marginBottom: 12
     }
   });
 
 class SentimentPercentagePage extends Component{
     constructor(props){
         super(props);
+        //const receivedData = props.data;
         this.state = {
             //mock for now
+            //data: receivedData,
             data: {
                 common_tweets: {
                     good_tweets: [
@@ -68,7 +75,6 @@ class SentimentPercentagePage extends Component{
                     Very_Good: 20,
                     Bad: 10
                 },
-                most_retweeted: "This is the text of the most retweeted tweet",
                 sentiments: [
                     {
                         average_value: 8.186492340157754,
@@ -83,9 +89,13 @@ class SentimentPercentagePage extends Component{
                         count: 266
                     },
                 ],
+                most_retweeted: {
+                    text: "First Look at @ElonMusk's Boring Company 'Brick Store'\n#techradio \ud83d\udcfb",
+                    count: 2385
+                },
             },
             filteredData: [],
-            currentInterval: ""
+            currentInterval: "",
         }
     }
 
@@ -191,14 +201,43 @@ class SentimentPercentagePage extends Component{
                 <div>
                   <RadialChart
                     data={dataPoints}
-                    width={300}
-                    height={300}
+                    width={500}
+                    height={600}
                     showLabels={true}
                     labelsAboveChildren={true}
                   />
                 </div>
             </Fragment>
           );
+    }
+
+    renderTwitterCard(){
+        return(
+            <Card style={{maxWidth: 500}}>
+                <CardMedia
+                    style={{height: 140}}
+                    image="https://kt-media-knowtechie.netdna-ssl.com/wp-content/uploads/2017/05/twitter.png"
+                />
+                <CardContent>
+                <Typography gutterBottom variant="h5" component="h2">
+                    Most Retweeted
+                </Typography>
+                <Typography component="p">
+                    {this.convertUnicode(this.state.data.most_retweeted.text)}
+                </Typography>
+                <Typography component="i">
+                    {this.state.data.most_retweeted.count + " retweets"}
+                </Typography>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    convertUnicode(input) {
+        return input.replace(/\\u(\w\w\w\w)/g,function(a,b) {
+            var charcode = parseInt(b,16);
+            return String.fromCharCode(charcode);
+        });
     }
 
     render(){
@@ -214,33 +253,47 @@ class SentimentPercentagePage extends Component{
                     alignItems="center"
                     direction="row"
                 >
-                    <FormControl className={classes.formControl}>
-                        <InputLabel htmlFor="filter-simple">Interval</InputLabel>
-                        <Select
-                            onChange={this.handleIntervalChange}
-                            value={this.state.currentInterval != "" ? this.state.currentInterval : "Select Interval"}
-                            inputProps={{
-                                name: "interval",
-                                id: "interval-simple"
-                            }}
+                    <Grid item className={classes.horizontalSpacer}>
+                        <Grid
+                            container
+                            justify="center"
+                            alignItems="flex-start"
+                            direction="column"
                         >
-                        {
-                            intervals.map((interval,i) => (<MenuItem value={interval} >{interval}</MenuItem>))
-                        }
-                        </Select>
-                    </FormControl>
-                    <Grid
-                        container
-                        justify="space-evenly"
-                        alignItems="center"
-                        direction="row"
-                    >
-                        <Grid item  className={classes.horizontalSpacer}>
-                            {this.state.filteredData.length > 0 && (
-                                this.renderBar(this.state.filteredData)
-                            )}
+                            <Grid item>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor="filter-simple">Interval</InputLabel>
+                                    <Select
+                                        onChange={this.handleIntervalChange}
+                                        value={this.state.currentInterval != "" ? this.state.currentInterval : "Select Interval"}
+                                        inputProps={{
+                                            name: "interval",
+                                            id: "interval-simple"
+                                        }}
+                                    >
+                                    {
+                                        intervals.map((interval,i) => (<MenuItem value={interval} >{interval}</MenuItem>))
+                                    }
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item  className={classes.verticalSpacer}>
+                                {this.state.filteredData.length > 0 && (
+                                    this.renderBar(this.state.filteredData)
+                                )}
+                            </Grid>
+                            <Grid item  className={classes.verticalSpacer}>
+                                {this.renderTwitterCard()}
+                            </Grid>
                         </Grid>
-                        <Grid item  className={classes.horizontalSpacer}>
+                    </Grid>
+                    <Grid item className={classes.horizontalSpacer}>
+                        <Grid
+                            container
+                            justify="space-evenly"
+                            alignItems="center"
+                            direction="column"
+                        >
                             {this.renderPie(this.state.data)}
                         </Grid>
                     </Grid>

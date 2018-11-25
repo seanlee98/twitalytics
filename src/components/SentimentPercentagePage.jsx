@@ -48,59 +48,17 @@ const styles = theme => ({
 class SentimentPercentagePage extends Component{
     constructor(props){
         super(props);
-        //const receivedData = props.data;
+        const receivedData = props.data;
         this.state = {
             //mock for now
-            //data: receivedData,
-            data: {
-                common_tweets: {
-                    good_tweets: [
-                        "steve jobs mark",
-                        "important jeff",
-                        "steve jobs"
-                    ],
-                    bad_tweets: [
-                        "artificial intelligence",
-                        "first tunnel",
-                        "boring company",
-                        "brick store",
-                        "brick store via",
-                        "boring company goes",
-                    ]
-                },
-                cumulative_percentages:{
-                    Very_Bad: 10,
-                    Good: 20,
-                    Average: 40,
-                    Very_Good: 20,
-                    Bad: 10
-                },
-                sentiments: [
-                    {
-                        average_value: 8.186492340157754,
-                        interval: "2018-11-17T22:00:00",
-                        sentiments: {
-                            Very_Bad: 6,
-                            Good: 48,
-                            Average: 171,
-                            Very_Good: 24,
-                            Bad: 17
-                        },
-                        count: 266
-                    },
-                ],
-                most_retweeted: {
-                    text: "First Look at @ElonMusk's Boring Company 'Brick Store'\n#techradio \ud83d\udcfb",
-                    count: 2385
-                },
-            },
+            data: receivedData,
             filteredData: [],
             currentInterval: "",
         }
     }
 
     createIntervalList(data) {
-        if(data.sentiments){
+        if(data.sentiments && data.sentiments.length > 0){
             let intervals = [];
             data.sentiments.map((dataPoint, index) => {
                 intervals.push(dataPoint.interval);

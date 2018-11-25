@@ -15,6 +15,9 @@ import SentimentOverTimePage from "./SentimentOverTimePage";
 import SentimentPercentagePage from "./SentimentPercentagePage";
 import TweetsOverTimePage from "./TweetsOverTimePage";
 import Grid from "@material-ui/core/Grid";
+import Card from "@material-ui/core/Card";
+import CardContent from "@material-ui/core/CardContent";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
   root: {
@@ -110,6 +113,13 @@ class DataPage extends Component {
                     </MenuItem>
                   </Select>
                 </FormControl>
+                <Card>
+                  <CardContent>
+                    <Typography variant="h5">
+                      Search queried: {this.state.searchData}
+                    </Typography>{" "}
+                  </CardContent>
+                </Card>
               </Grid>
             </form>
             {data.length === 0 ? (

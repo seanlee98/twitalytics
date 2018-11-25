@@ -34,9 +34,8 @@ class DataPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      filter: "Sentiment Analysis",
       labelWidth: 0,
-      dataFilterPage: "Sentiment Over Time Page",
+      dataFilterPage: "Sentiment Over Time",
       data: [],
       searchData: this.props.location.state.searchValue
     };
@@ -47,10 +46,12 @@ class DataPage extends Component {
     const data = await fetchTwitterData(this.state.searchData);
 
     console.log("data retrieved from api call: ", data);
-    this.setState({
-      labelWidth: 50,
-      data: data
-    });
+    if (data) {
+      this.setState({
+        labelWidth: 50,
+        data: data
+      });
+    }
   }
 
   handleDataPageChange = event => {
@@ -63,11 +64,11 @@ class DataPage extends Component {
 
   renderDataPageComponent(dataFilterPage) {
     const data = this.state.data;
-    if (dataFilterPage.includes("Sentiment Over Time Page")) {
+    if (dataFilterPage.includes("Sentiment Over Time")) {
       return <SentimentOverTimePage data={data} />;
-    } else if (dataFilterPage.includes("Sentiment Percentage Page")) {
+    } else if (dataFilterPage.includes("Sentiment Percentage")) {
       return <SentimentPercentagePage data={data} />;
-    } else if (dataFilterPage.includes("Tweets Over Time Page")) {
+    } else if (dataFilterPage.includes("Tweets Over Time")) {
       return <TweetsOverTimePage data={data} />;
     }
   }
@@ -98,14 +99,14 @@ class DataPage extends Component {
                       id: "filter-simple"
                     }}
                   >
-                    <MenuItem value={"Sentiment Over Time Page"}>
-                      Sentiment Over Time Page
+                    <MenuItem value={"Sentiment Over Time"}>
+                      Sentiment Over Time
                     </MenuItem>
-                    <MenuItem value={"Sentiment Percentage Page"}>
-                      Sentiment Percentage Page
+                    <MenuItem value={"Sentiment Percentage"}>
+                      Sentiment Percentage
                     </MenuItem>
-                    <MenuItem value={"Tweets Over Time Page"}>
-                      Tweets Over Time Page
+                    <MenuItem value={"Tweets Over Time"}>
+                      Tweets Over Time
                     </MenuItem>
                   </Select>
                 </FormControl>

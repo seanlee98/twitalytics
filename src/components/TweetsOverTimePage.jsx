@@ -143,7 +143,7 @@ class TweetsOverTimePage extends Component {
             <YAxis title="Tweet Category Count (Number of Tweets)" />
             <LineSeries data={totalCountArray} color="black" />
             <LineSeries data={veryBadCountArray} color="#ed553b" />
-            <LineSeries data={badCountArray} color="#173f5f" />
+            <LineSeries data={badCountArray} color="brown" />
             <LineSeries data={averageCountArray} color="#20639b" />
             <LineSeries data={goodCountArray} color="#f6d55c" />
             <LineSeries data={veryGoodCountArray} color="#3caea3" />
@@ -160,7 +160,7 @@ class TweetsOverTimePage extends Component {
               <br />
               <font color="#ed553b">Very Bad Category</font>
               <br />
-              <font color="#173f5f">Bad Category</font>
+              <font color="brown">Bad Category</font>
               <br />
               <font color="#20639b">Average Category</font>
               <br />

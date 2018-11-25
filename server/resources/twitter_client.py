@@ -30,6 +30,10 @@ class TwitterClient(object):
 			"consumer_key": 'ENE70oiMDLwiv3CFJtNcLVXNx',
 			"consumer_secret": '33AU7pd8EJZgQAyMB2w8SybRCpNQyxXtX2v53KShYMhUhXnL2s',
 		}
+		account4 = {
+			"consumer_key": 'FbBzH9UH3IV7vOwKNf07i4WkW',
+			"consumer_secret": 'luuSMMhLarF5VqY5r8RhRWNKtNGnpcTpCtobGhRPle7BAwgvEss',
+		}
 		self.Months = {
 			"Jan" : 1,
 			"Feb" : 2,
@@ -50,7 +54,8 @@ class TwitterClient(object):
 			python_tweets1 = Twython(account1["consumer_key"], account1["consumer_secret"])
 			python_tweets2 = Twython(account2["consumer_key"], account2["consumer_secret"])
 			python_tweets3 = Twython(account3["consumer_key"], account3["consumer_secret"])
-			self.python_tweets = [python_tweets0,python_tweets1,python_tweets2,python_tweets3]
+			python_tweets4 = Twython(account4["consumer_key"], account4["consumer_secret"])
+			self.python_tweets = [python_tweets0,python_tweets1,python_tweets2,python_tweets3,python_tweets4]
 			self.twitter_index = 0
 		except: 
 			print("Error: Authentication Failed") 
@@ -89,6 +94,14 @@ class TwitterClient(object):
 		intervals = {} 
 		bad_tweets = []
 		good_tweets = []
+		cumulative_count = {
+			"Very_Bad": 0,
+			"Bad": 0,
+			"Average": 0,
+			"Good": 0,
+			"Very_Good": 0,
+		}
+		tweet_frequency = {}
 		current_time = datetime.utcnow()
 		current_time = current_time.replace(second=0, microsecond=0, minute=0, hour=current_time.hour)
 		intervals[self.json_serial(current_time)] = {
@@ -135,20 +148,33 @@ class TwitterClient(object):
 							created_at = created_at[5] + "-" + str(self.Months[created_at[1]]) + "-" + created_at[2] + "T" + created_at[3][0] + created_at[3][1] + ":00:00"
 							sentiment = self.get_tweet_sentiment(tweet["text"]) 
 							print(sentiment)
+							if tweet["text"][:3] == 'RT ':
+								retweeted_text = self.clean_tweet(tweet["text"][3:])
+							else:
+								retweeted_text = self.clean_tweet(tweet["text"])
+							if retweeted_text in tweet_frequency:
+								tweet_frequency[retweeted_text] += 1
+							else:
+								tweet_frequency[retweeted_text] = 1
 							intervals[created_at]["average_value"].append(sentiment)
 							if sentiment >= -100 and sentiment < -60:
 								intervals[created_at]["sentiments"]["Very_Bad"] += 1
+								cumulative_count["Very_Bad"] += 1
 								bad_tweets.append(tweet["text"])
 							elif sentiment >= -60 and sentiment < -20:
 								intervals[created_at]["sentiments"]["Bad"] += 1
+								cumulative_count["Bad"] += 1
 								bad_tweets.append(tweet["text"])
 							elif sentiment >= -20 and sentiment < 20:
 								intervals[created_at]["sentiments"]["Average"] += 1
+								cumulative_count["Average"] += 1
 							elif sentiment >= 20 and sentiment < 60:
 								intervals[created_at]["sentiments"]["Good"] += 1
+								cumulative_count["Good"] += 1
 								good_tweets.append(tweet["text"])
 							elif sentiment >= 60 and sentiment <= 100:
 								intervals[created_at]["sentiments"]["Very_Good"] += 1
+								cumulative_count["Very_Good"] += 1
 								good_tweets.append(tweet["text"])
 						# call twitter api to fetch tweets 
 						query = {
@@ -174,26 +200,46 @@ class TwitterClient(object):
 					interval["average_value"] = total / num
 				else:
 					interval["average_value"] = 0
+			cumulative_total = 0
+			for _,count in cumulative_count.items():
+				cumulative_total += count
+			
+			cumulative_percentages = {}
+			for key,count in cumulative_count.items():
+				if cumulative_total > 0:
+					cumulative_percentages[key] = (count / cumulative_total) * 100
+				else:
+					count = 0
 			# frontend has asked for this response shape and so it shall be
 			correct_shape = []
-			for key,interval in intervals.items():
+			for key, interval in intervals.items():
+				count = 0
+				for _, amount in interval["sentiments"].items():
+					count += amount
 				correct_shape.append(
 					{
 						"interval": key,
 						"sentiments": {
-							"Very Bad": interval["sentiments"]["Very_Bad"],
+							"Very_Bad": interval["sentiments"]["Very_Bad"],
 							"Bad": interval["sentiments"]["Bad"],
 							"Average": interval["sentiments"]["Average"],
 							"Good": interval["sentiments"]["Good"],
-							"Very Good": interval["sentiments"]["Very_Good"],
+							"Very_Good": interval["sentiments"]["Very_Good"],
 						}, 
 						"average_value": interval["average_value"], 
+						"count": count,
 					}
 			) 
 			correct_shape = sorted(correct_shape, key=lambda k: k['interval'])
 			print("reached right before common_tweets")
 			common_tweets = {"bad_tweets": getTweetTopics(list(set(bad_tweets))), "good_tweets": getTweetTopics(list(set(good_tweets)))}
-			return {"sentiments": correct_shape, "common_tweets": common_tweets} 
+			most_retweeted_text = max(tweet_frequency, key=tweet_frequency.get)
+			return {
+				"sentiments": correct_shape, 
+				"cumulative_percentages": cumulative_percentages, 
+				"most_retweeted": {"text":most_retweeted_text, "count": tweet_frequency[most_retweeted_text]},
+				"common_tweets": common_tweets
+			} 
 			
 		except Exception as e: 
 			print("You done fucked up")

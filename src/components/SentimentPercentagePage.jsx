@@ -55,7 +55,8 @@ class SentimentPercentagePage extends Component{
             filteredData: [],
             currentInterval: "",
         }
-        this.yMax = 0
+        this.yMax = 0;
+        this.isInit = true;
     }
 
     createIntervalList(data) {
@@ -232,6 +233,10 @@ class SentimentPercentagePage extends Component{
         
         const { classes } = this.props;
         const intervals = this.createIntervalList(this.state.data);
+        if(intervals.length > 0 && this.isInit){
+            this.filterDataIntervals(this.state.data, intervals[0]);
+            this.isInit = false;
+        }
 
         return(
             <form>

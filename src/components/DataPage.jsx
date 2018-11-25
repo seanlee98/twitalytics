@@ -11,6 +11,9 @@ import DataView from "./DataView";
 import { fetchTwitterData } from "../utils/ApiCalls";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import NavBar from "./NavBar";
+// import SentimentOverTimePage from "./SentimentOverTimePage";
+// import SentimentPercentagePage from "./SentimentPercentagePage";
+import TweetsOverTimePage from "./TweetsOverTimePage";
 
 const styles = theme => ({
   root: {
@@ -31,9 +34,8 @@ class DataPage extends Component {
     super(props);
     this.state = {
       filter: "Sentiment Analysis",
-      interval: "null",
       labelWidth: 0,
-      dataFilter: "Sentiment Analysis",
+      dataFilterPage: "Sentiment Over Time Page",
       data: [],
       searchData: this.props.location.state.searchValue
     };
@@ -45,129 +47,71 @@ class DataPage extends Component {
     console.log("data retrieved from api call: ", data);
     this.setState({
       labelWidth: 50,
-      data: data.sentiments,
-      isDataRetrieved: true
+      data: data.sentiments
     });
   }
 
-  handleGraphChange = event => {
-    const value = event.target.value;
+  handleDataPageChance = event => {
+    const page = event.target.value;
     this.setState({
-      dataFilter: value,
-      [event.target.name]: value
+      dataFilterPage: page,
+      [event.target.name]: page
     });
   };
 
-  handleIntervalChange = event => {
-    const value = event.target.value;
-    this.setState({
-      dataInterval: value,
-      [event.target.name]: value
-    });
-  };
-
-  createIntervalList(data) {
-    if (data) {
-      let intervals = [];
-      data.map((dataPoint, index) => {
-        intervals.push(dataPoint.interval);
-      });
-      return intervals;
-    } else {
-      return [];
+  renderDataPageComponent(dataFilterPage) {
+    const data = this.state.data;
+    if (dataFilterPage.includes("Sentiment Over Time Page")) {
+      // return <SentimentOverTimePage data={data} />;
+    } else if (dataFilterPage.includes("Sentiment Percentage Page")) {
+      // return <SentimentPercentagePage data={data} />;
+    } else if (dataFilterPage.includes("Tweets Over Time Page")) {
+      return <TweetsOverTimePage data={data} />;
     }
   }
-
-  filterData(data) {
-    let filteredData = [];
-    if (this.state.filter.includes("Sentiment Analysis")) {
-      filteredData = data;
-    } else {
-      data.map((dataPoint, index) => {
-        if (dataPoint.interval.includes(this.state.interval)) {
-          filteredData.push(dataPoint);
-        }
-      });
-    }
-
-    return filteredData;
-  }
-
   render() {
     const { classes } = this.props;
-    const { dataFilter, data } = this.state;
-    const intervals = this.createIntervalList(data);
+    const { dataFilterPage, data } = this.state;
 
     return (
       <Fragment>
         <NavBar />
         <div className="container">
           <div className="data-container">
-            {dataFilter.includes("Sentiment Analysis") ? (
-              <form>
-                <FormControl className={classes.formControl}>
-                  <InputLabel htmlFor="filter-simple">Filter</InputLabel>
-                  <Select
-                    value={this.state.dataFilter}
-                    onChange={this.handleGraphChange}
-                    inputProps={{
-                      name: "filter",
-                      id: "filter-simple"
-                    }}
-                  >
-                    <MenuItem value={"Sentiment Analysis"}>
-                      Sentiment Analysis
-                    </MenuItem>
-                    <MenuItem value={"Sentiment Count"}>
-                      Sentiment Count
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-              </form>
-            ) : (
-              <form>
-                <FormControl className={classes.formControl}>
-                  <InputLabel htmlFor="filter-simple">Filter</InputLabel>
-                  <Select
-                    value={this.state.dataFilter}
-                    onChange={this.handleGraphChange}
-                    inputProps={{
-                      name: "filter",
-                      id: "filter-simple"
-                    }}
-                  >
-                    <MenuItem value={"Sentiment Analysis"}>
-                      Sentiment Analysis
-                    </MenuItem>
-                    <MenuItem value={"Sentiment Count"}>
-                      Sentiment Count
-                    </MenuItem>
-                  </Select>
-                </FormControl>
-                <FormControl className={classes.formControl}>
-                  <InputLabel htmlFor="filter-simple">Interval</InputLabel>
-                  <Select
-                    onChange={this.handleIntervalChange}
-                    value={this.state.interval}
-                    inputProps={{
-                      name: "interval",
-                      id: "interval-simple"
-                    }}
-                  >
-                    {intervals.map((interval, i) => (
-                      <MenuItem value={interval}>{interval}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </form>
-            )}
+            <form>
+              <FormControl className={classes.formControl}>
+                <InputLabel htmlFor="filter-simple">Filter Page</InputLabel>
+                <Select
+                  value={dataFilterPage}
+                  onChange={this.handleDataPageChange}
+                  inputProps={{
+                    name: "filter",
+                    id: "filter-simple"
+                  }}
+                >
+                  <MenuItem value={"Sentiment Over Time Page"}>
+                    Sentiment Over Time Page
+                  </MenuItem>
+                  <MenuItem value={"Sentiment Percentage Page"}>
+                    Sentiment Percentage Page
+                  </MenuItem>
+                  <MenuItem value={"Tweets Over Time Page"}>
+                    Tweets Over Time Page
+                  </MenuItem>
+                </Select>
+              </FormControl>
+            </form>
             {data.length === 0 ? (
+              // Case where data hasn't been returned
+              // Render a loading spinner
               <div>
                 {" "}
                 <CircularProgress className={classes.progress} />
               </div>
             ) : (
-              <DataView dataFilter={dataFilter} data={this.filterData(data)} />
+              // Case where we have received data from the api call
+              // Need to decide which component to render based on our this.state.dataFilterPage
+              <div>{this.renderDataPageComponent(dataFilterPage)}</div>
             )}
           </div>
         </div>

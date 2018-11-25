@@ -153,7 +153,7 @@ class SentimentPercentagePage extends Component{
                   <XYPlot
                     xType={"ordinal"}
                     width={500}
-                    height={300}
+                    height={325}
                     yDomain={[0, 300]}
                   >
                     <VerticalGridLines />
@@ -172,21 +172,27 @@ class SentimentPercentagePage extends Component{
         for(const key in data.cumulative_percentages){
             const dataPoint = {}
             dataPoint.angle = data.cumulative_percentages[key]
+            dataPoint.radius = 5
             switch(key){
                 case "Very_Bad":
-                    dataPoint.label = "Very Bad " + "(" + data.cumulative_percentages[key] + "%)";
+                    dataPoint.label = data.cumulative_percentages[key] + "%";
+                    dataPoint.color = "#ed553b"
                     break;
                 case "Bad":
-                    dataPoint.label = "Bad " + "(" + data.cumulative_percentages[key] + "%)";
+                    dataPoint.label = data.cumulative_percentages[key] + "%";
+                    dataPoint.color = "#173f5f"
                     break;
                 case "Average":
-                    dataPoint.label = "Average " + "(" + data.cumulative_percentages[key] + "%)";
+                    dataPoint.label = data.cumulative_percentages[key] + "%";
+                    dataPoint.color = "#20639b"
                     break;
                 case "Good":
-                    dataPoint.label = "Good " + "(" + data.cumulative_percentages[key] + "%)";
+                    dataPoint.label = data.cumulative_percentages[key] + "%";
+                    dataPoint.color = "#f6d55c"
                     break;
                 case "Very_Good":
-                    dataPoint.label = "Very Good " + "(" + data.cumulative_percentages[key] + "%)";
+                    dataPoint.label = data.cumulative_percentages[key] + "%";
+                    dataPoint.color = "#3caea3"
                     break;
             }
             pieData.push(dataPoint)
@@ -201,8 +207,8 @@ class SentimentPercentagePage extends Component{
                 <div>
                   <RadialChart
                     data={dataPoints}
-                    width={500}
-                    height={600}
+                    width={400}
+                    height={450}
                     showLabels={true}
                     labelsAboveChildren={true}
                   />
@@ -231,6 +237,30 @@ class SentimentPercentagePage extends Component{
                 </CardContent>
             </Card>
         )
+    }
+
+    renderLegend(){
+        return(
+            <div>
+                <Card>
+                    <CardContent>
+                    <Typography component="p" variant="h2">
+                        Legend
+                    </Typography>
+                    <br />
+                    <font color="#ed553b">Very Bad Category</font>
+                    <br />
+                    <font color="#173f5f">Bad Category</font>
+                    <br />
+                    <font color="#20639b">Average Category</font>
+                    <br />
+                    <font color="#f6d55c">Good Category</font>
+                    <br />
+                    <font color="#3caea3">Very Good Category</font>
+                    </CardContent>
+                </Card>
+            </div>
+        );
     }
 
     convertUnicode(input) {
@@ -294,7 +324,12 @@ class SentimentPercentagePage extends Component{
                             alignItems="center"
                             direction="column"
                         >
-                            {this.renderPie(this.state.data)}
+                            <Grid item className={classes.verticalSpacer}>
+                                {this.renderPie(this.state.data)}
+                            </Grid>
+                            <Grid item className={classes.horizontalSpacer}>
+                                {this.renderLegend()}
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>

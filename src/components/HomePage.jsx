@@ -80,23 +80,23 @@ class HomePage extends Component {
           <NavBar />
           <Grid
             container
-            spacing={24}
+            spacing={6}
             justify="center"
             alignItems="center"
             direction="column"
           >
             <Grid item xs={12}>
               <div className="main-title">
-                <Typography variant="h1">Twitalytics</Typography>
+                <Typography style={{fontWeight:"bold"}} variant="h1">Twitalytics</Typography>
               </div>
               <div className="sub-title">
-                <Typography varient="h3">
+                <Typography style={{textAlign:"center", fontSize:16}} varient="h3">
                   See what the Twitter-verse is saying about your latest
                   product!
                 </Typography>
               </div>
             </Grid>
-            <Grid spacing={24}>
+            <Grid spacing={20}>
               <Grid item xs={6}>
                 <div className="search-container">
                   <Input

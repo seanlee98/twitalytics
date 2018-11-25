@@ -55,6 +55,7 @@ class SentimentPercentagePage extends Component{
             filteredData: [],
             currentInterval: "",
         }
+        this.yMax = 0
     }
 
     createIntervalList(data) {
@@ -89,15 +90,19 @@ class SentimentPercentagePage extends Component{
     formatBarDataPoints(data) {
         const dataPoints = data;
         let dataArray = [];
+        let yArr = [];
 
         dataPoints.map((dataPoint, index) => {
             const sentiments = dataPoint.sentiments;
             for (var index in sentiments) {
-            dataArray.push({
-                x: index,
-                y: sentiments[index]
-            });
+                dataArray.push({
+                    x: index,
+                    y: sentiments[index]
+                });
+                yArr.push(sentiments[index]);
             }
+            const yMax = 1.1*(Math.max(...yArr));
+            this.yMax = yMax
         });
 
         return dataArray;
@@ -112,7 +117,7 @@ class SentimentPercentagePage extends Component{
                     xType={"ordinal"}
                     width={500}
                     height={325}
-                    yDomain={[0, 300]}
+                    yDomain={[0, this.yMax]}
                   >
                     <VerticalGridLines />
                     <HorizontalGridLines />

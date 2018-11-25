@@ -12,8 +12,9 @@ import { fetchTwitterData } from "../utils/ApiCalls";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import NavBar from "./NavBar";
 // import SentimentOverTimePage from "./SentimentOverTimePage";
-// import SentimentPercentagePage from "./SentimentPercentagePage";
+import SentimentPercentagePage from "./SentimentPercentagePage";
 import TweetsOverTimePage from "./TweetsOverTimePage";
+import Grid from "@material-ui/core/Grid";
 
 const styles = theme => ({
   root: {
@@ -44,14 +45,15 @@ class DataPage extends Component {
   async componentDidMount() {
     console.log("props passed in from HomePage: ", this.props);
     const data = await fetchTwitterData(this.state.searchData);
+
     console.log("data retrieved from api call: ", data);
     this.setState({
       labelWidth: 50,
-      data: data.sentiments
+      data: data
     });
   }
 
-  handleDataPageChance = event => {
+  handleDataPageChange = event => {
     const page = event.target.value;
     this.setState({
       dataFilterPage: page,
@@ -64,11 +66,12 @@ class DataPage extends Component {
     if (dataFilterPage.includes("Sentiment Over Time Page")) {
       // return <SentimentOverTimePage data={data} />;
     } else if (dataFilterPage.includes("Sentiment Percentage Page")) {
-      // return <SentimentPercentagePage data={data} />;
+      return <SentimentPercentagePage data={data} />;
     } else if (dataFilterPage.includes("Tweets Over Time Page")) {
       return <TweetsOverTimePage data={data} />;
     }
   }
+
   render() {
     const { classes } = this.props;
     const { dataFilterPage, data } = this.state;
@@ -79,27 +82,34 @@ class DataPage extends Component {
         <div className="container">
           <div className="data-container">
             <form>
-              <FormControl className={classes.formControl}>
-                <InputLabel htmlFor="filter-simple">Filter Page</InputLabel>
-                <Select
-                  value={dataFilterPage}
-                  onChange={this.handleDataPageChange}
-                  inputProps={{
-                    name: "filter",
-                    id: "filter-simple"
-                  }}
-                >
-                  <MenuItem value={"Sentiment Over Time Page"}>
-                    Sentiment Over Time Page
-                  </MenuItem>
-                  <MenuItem value={"Sentiment Percentage Page"}>
-                    Sentiment Percentage Page
-                  </MenuItem>
-                  <MenuItem value={"Tweets Over Time Page"}>
-                    Tweets Over Time Page
-                  </MenuItem>
-                </Select>
-              </FormControl>
+              <Grid
+                container
+                justify="center"
+                alignItems="center"
+                direction="column"
+              >
+                <FormControl className={classes.formControl}>
+                  <InputLabel htmlFor="filter-simple">Filter Page</InputLabel>
+                  <Select
+                    value={dataFilterPage}
+                    onChange={this.handleDataPageChange}
+                    inputProps={{
+                      name: "filter",
+                      id: "filter-simple"
+                    }}
+                  >
+                    <MenuItem value={"Sentiment Over Time Page"}>
+                      Sentiment Over Time Page
+                    </MenuItem>
+                    <MenuItem value={"Sentiment Percentage Page"}>
+                      Sentiment Percentage Page
+                    </MenuItem>
+                    <MenuItem value={"Tweets Over Time Page"}>
+                      Tweets Over Time Page
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
             </form>
             {data.length === 0 ? (
               // Case where data hasn't been returned

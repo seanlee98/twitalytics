@@ -19,3 +19,41 @@ code {
   align-items: center;
   justify-content: center;
 }
+
+.main-title {
+  margin-top: 50px;
+}
+
+.sub-title {
+  margin-top: 25px;
+}
+
+.search-container {
+  margin-top: 100px;
+}
+
+.carousel-container {
+  margin-top: 50px;
+  width: 500px;
+  height: 250px;
+}
+
+.carousel {
+  height: inherit;
+}
+
+.slider-wrapper {
+  height: 250px !important;
+}
+
+.slider {
+  height: 250px !important;
+}
+
+.img-container {
+  height: 250px;
+}
+
+img {
+  height: 250px;
+}

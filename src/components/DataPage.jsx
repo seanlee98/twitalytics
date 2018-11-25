@@ -10,6 +10,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import DataView from "./DataView";
 import { fetchTwitterData } from "../utils/ApiCalls";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import NavBar from "./NavBar";
 
 const styles = theme => ({
   root: {
@@ -29,12 +30,12 @@ class DataPage extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      filter: "",
+      filter: "Sentiment Analysis",
       interval: "null",
       labelWidth: 0,
       dataFilter: "Sentiment Analysis",
       data: [],
-      searchData: this.props.location.state.searchValue,
+      searchData: this.props.location.state.searchValue
     };
   }
 
@@ -63,17 +64,16 @@ class DataPage extends Component {
       dataInterval: value,
       [event.target.name]: value
     });
-  }
+  };
 
   createIntervalList(data) {
-    if(data){
+    if (data) {
       let intervals = [];
       data.map((dataPoint, index) => {
         intervals.push(dataPoint.interval);
       });
       return intervals;
-    }
-    else{
+    } else {
       return [];
     }
   }
@@ -82,8 +82,7 @@ class DataPage extends Component {
     let filteredData = [];
     if (this.state.filter.includes("Sentiment Analysis")) {
       filteredData = data;
-    }
-    else {
+    } else {
       data.map((dataPoint, index) => {
         if (dataPoint.interval.includes(this.state.interval)) {
           filteredData.push(dataPoint);
@@ -101,6 +100,7 @@ class DataPage extends Component {
 
     return (
       <Fragment>
+        <NavBar />
         <div className="container">
           <div className="data-container">
             {dataFilter.includes("Sentiment Analysis") ? (
@@ -154,9 +154,9 @@ class DataPage extends Component {
                       id: "interval-simple"
                     }}
                   >
-                    {
-                      intervals.map((interval,i) => (<MenuItem value={interval} >{interval}</MenuItem>))
-                    }
+                    {intervals.map((interval, i) => (
+                      <MenuItem value={interval}>{interval}</MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </form>

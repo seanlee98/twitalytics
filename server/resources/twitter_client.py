@@ -149,9 +149,9 @@ class TwitterClient(object):
 							sentiment = self.get_tweet_sentiment(tweet["text"]) 
 							print(sentiment)
 							if tweet["text"][:3] == 'RT ':
-								retweeted_text = self.clean_tweet(tweet["text"][3:])
+								retweeted_text = tweet["text"][3:]
 							else:
-								retweeted_text = self.clean_tweet(tweet["text"])
+								retweeted_text = tweet["text"]
 							if retweeted_text in tweet_frequency:
 								tweet_frequency[retweeted_text] += 1
 							else:

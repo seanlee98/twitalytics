@@ -55,6 +55,8 @@ class SentimentPercentagePage extends Component{
             filteredData: [],
             currentInterval: "",
         }
+        this.yMax = 0;
+        this.isInit = true;
     }
 
     createIntervalList(data) {
@@ -89,15 +91,19 @@ class SentimentPercentagePage extends Component{
     formatBarDataPoints(data) {
         const dataPoints = data;
         let dataArray = [];
+        let yArr = [];
 
         dataPoints.map((dataPoint, index) => {
             const sentiments = dataPoint.sentiments;
             for (var index in sentiments) {
-            dataArray.push({
-                x: index,
-                y: sentiments[index]
-            });
+                dataArray.push({
+                    x: index,
+                    y: sentiments[index]
+                });
+                yArr.push(sentiments[index]);
             }
+            const yMax = 1.1*(Math.max(...yArr));
+            this.yMax = yMax
         });
 
         return dataArray;
@@ -112,7 +118,7 @@ class SentimentPercentagePage extends Component{
                     xType={"ordinal"}
                     width={500}
                     height={325}
-                    yDomain={[0, 300]}
+                    yDomain={[0, this.yMax]}
                   >
                     <VerticalGridLines />
                     <HorizontalGridLines />
@@ -130,26 +136,21 @@ class SentimentPercentagePage extends Component{
         for(const key in data.cumulative_percentages){
             const dataPoint = {}
             dataPoint.angle = data.cumulative_percentages[key]
-            dataPoint.radius = 5
+            dataPoint.label = Math.round(data.cumulative_percentages[key]) + "%";
             switch(key){
                 case "Very_Bad":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#ed553b"
                     break;
                 case "Bad":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#173f5f"
                     break;
                 case "Average":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#20639b"
                     break;
                 case "Good":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#f6d55c"
                     break;
                 case "Very_Good":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#3caea3"
                     break;
             }
@@ -232,6 +233,10 @@ class SentimentPercentagePage extends Component{
         
         const { classes } = this.props;
         const intervals = this.createIntervalList(this.state.data);
+        if(intervals.length > 0 && this.isInit){
+            this.filterDataIntervals(this.state.data, intervals[0]);
+            this.isInit = false;
+        }
 
         return(
             <form>

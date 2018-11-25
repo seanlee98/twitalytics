@@ -11,7 +11,7 @@ import DataView from "./DataView";
 import { fetchTwitterData } from "../utils/ApiCalls";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import NavBar from "./NavBar";
-// import SentimentOverTimePage from "./SentimentOverTimePage";
+import SentimentOverTimePage from "./SentimentOverTimePage";
 import SentimentPercentagePage from "./SentimentPercentagePage";
 import TweetsOverTimePage from "./TweetsOverTimePage";
 import Grid from "@material-ui/core/Grid";
@@ -64,7 +64,7 @@ class DataPage extends Component {
   renderDataPageComponent(dataFilterPage) {
     const data = this.state.data;
     if (dataFilterPage.includes("Sentiment Over Time Page")) {
-      // return <SentimentOverTimePage data={data} />;
+      return <SentimentOverTimePage data={data} />;
     } else if (dataFilterPage.includes("Sentiment Percentage Page")) {
       return <SentimentPercentagePage data={data} />;
     } else if (dataFilterPage.includes("Tweets Over Time Page")) {

@@ -130,26 +130,21 @@ class SentimentPercentagePage extends Component{
         for(const key in data.cumulative_percentages){
             const dataPoint = {}
             dataPoint.angle = data.cumulative_percentages[key]
-            dataPoint.radius = 5
+            dataPoint.label = Math.round(data.cumulative_percentages[key]) + "%";
             switch(key){
                 case "Very_Bad":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#ed553b"
                     break;
                 case "Bad":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#173f5f"
                     break;
                 case "Average":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#20639b"
                     break;
                 case "Good":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#f6d55c"
                     break;
                 case "Very_Good":
-                    dataPoint.label = data.cumulative_percentages[key] + "%";
                     dataPoint.color = "#3caea3"
                     break;
             }

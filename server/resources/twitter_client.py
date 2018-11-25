@@ -67,6 +67,9 @@ class TwitterClient(object):
 		'''
 		return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) |(\w+:\/\/\S+)", " ", tweet).split()) 
 
+	def clean_tweet_readable(self, tweet):
+		return tweet.replace('\n', " ")
+
 	def get_tweet_sentiment(self, tweet): 
 		''' 
 		Utility function to classify sentiment of passed tweet 
@@ -149,7 +152,7 @@ class TwitterClient(object):
 							sentiment = self.get_tweet_sentiment(tweet["text"]) 
 							print(sentiment)
 							if tweet["text"][:3] == 'RT ':
-								retweeted_text = tweet["text"][3:]
+								retweeted_text = self.clean_tweet_readable(tweet["text"][3:])
 							else:
 								retweeted_text = tweet["text"]
 							if retweeted_text in tweet_frequency:

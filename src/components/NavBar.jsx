@@ -6,10 +6,10 @@ import { Link } from "react-router-dom";
 const NavBar = () => {
   return (
     <div>
-      <AppBar position="static">
+      <AppBar position="static" style={{ background: '#00aced' }}>
         <Toolbar>
           <Typography variant="title">
-            <Link to="/" style={{ textDecoration: "none", color: "white" }}>
+            <Link to="/" style={{ textDecoration: "none", color: "#ffffff"}}>
               Twitalytics
             </Link>
           </Typography>

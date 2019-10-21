@@ -21,7 +21,7 @@ MarkupSafe==1.1.0
 marshmallow==2.14.0
 marshmallow-sqlalchemy==0.13.2
 mccabe==0.6.1
-nltk==3.4
+nltk==3.4.5
 numpy==1.15.4
 oauthlib==2.1.0
 psycopg2==2.7.5
